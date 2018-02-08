@@ -1,7 +1,8 @@
 ;hair内置模板
 ;实现对文件读写操作封装
-;命令版本号V1.2
+;命令版本号V1.4
 ;如果find模式不能正确匹配到文件，通常这是由于不同目录下存在相同的文件名，可以通过修改_path来指定目录
+;增加输出文件大小，copyx模式，iconv，find路径优化，7z压缩
 
 to hair.file.reg
 make "hair.file_require 1.2
@@ -26,6 +27,8 @@ new "File "Class
     if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readword this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
   .method "readlist [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name op :hrdlist]]
     if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
+  .method "readrawline [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
   .method "erase [if this.matchmode = "open [if hair.file.open this.name [erasefile this.name]]
     if this.matchmode = "find [if hair.file.find1 this.objname [erasefile this.name hair.file.find2 this._path]]] ;删除该文件
   .method "rename [[newname][if this.matchmode = "open [if hair.file.open this.name [hair.base.rename this.name :newname this.name.val :newname]]
@@ -34,6 +37,8 @@ new "File "Class
     if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.copyfile this.name :newname hair.file.find2 this._path]]]] ;复制文件到指定地址
   .method "eof? [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name op :hrdlist]]
     if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;检测是否到头
+  .method "size [if this.matchmode = "open [if hair.file.open this.name [localmake "hrdlist hair.file.size this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [localmake "hrdlist hair.file.size this.name hair.file.find2 this._path op :hrdlist]]] ;输出文件大小
   .listen "name [this._path.val [] this.position.val 0] ;修改操作的文件重置path
 end
 bury "hair.file.reg

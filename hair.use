@@ -15,6 +15,6 @@ if not PROCEDURE? word :mod ".reg [MESSAGEBOX [错误] se :mod "不是一个合�
 run (list word :mod ".reg)
 ifelse not name? word :mod "_require [hair.debug.error se :mod "未检测到需求版本][if :hair_version < thing word :mod "_require [hair.debug.error se :mod "正运行在较低版本的hair框架上]]
 if name? word :mod "_noconflict [hair.noconflict.repeat thing word :mod "_noconflict]
-if :hair_debug [pr se (word "启用组件 :mod thing word :mod "_require) [... 已完成]]
+if :hair_debug [pr se word "启用组件 :mod [... 已完成]]
 end
 bury [hair.use hair.use.repeat]

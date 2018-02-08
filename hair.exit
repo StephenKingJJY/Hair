@@ -12,7 +12,7 @@ foreach :hair_object_class [erpl word "hair_object_class_ ?] ;清除所有类
 
 make "erract [] ;删除错误提示信息
 
-buryname [hair_keepword hair_symbol hair_language hair_resource_piclimit hair_resource_picidlist hair_turtle hair_timer_id hair_timer_temp hair_detect hair_timeauth hair_debug hair_version
+buryname [hair_maindir hair_hwnd hair_keepword hair_symbol hair_language hair_resource_piclimit hair_resource_picidlist hair_turtle hair_timer_id hair_timer_temp hair_detect hair_timeauth hair_debug hair_version
 hair_object_current hair_hook_array hair_hook_index hair_object_list hair_object_class hair_debug_dribble hair_background_async] ;删除系统变量
 
 windowdelete "debugger

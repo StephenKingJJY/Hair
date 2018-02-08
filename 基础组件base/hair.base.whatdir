@@ -1,0 +1,9 @@
+;通过bat变量找到当前hair运行的主目录
+;whatdir命令名称来自于rebol
+;命令版本号v1.4
+
+to hair.base.whatdir
+hair.detect
+op bl bl (hair.base.shell [echo %cd% >whatdir_temp.htxt] "whatdir_temp.htxt "vbs)
+end
+bury "hair.base.whatdir

@@ -1,0 +1,42 @@
+;Hair v1.4 an object-oriented framework based on FMSLogo
+;written by StephenKing (jjy@wiwy.us)
+;Please confirm that you get the latest version from http://hair.wiwy.us
+;
+;hair v1.4 是一个基于FMSLogo的面向对象的框架
+;作者是StephenKing（jjy@wiwy.us）
+;请确保您是从http://hair.wiwy.us获取的最新版本。
+;
+;If your system is able to identify *.lgo file, you may just double-click this file and installation will start,
+;or you can open FMSLogo, choose the file--open section on menu bar.
+;
+;如果您的操作系统可以正确识别lgo文件，直接点击即可在fmslogo载入安装。
+;或者您可以自行打开fmslogo，通过file-open来打开本文件自动安装。
+;
+;Hair is released under MIT license.
+;您可以根据MIT协议使用hair框架
+
+to copyfile
+ct
+dllload "Kernel32.dll
+localmake "dir1 "release\\
+localmake "dir2 "logolib\\
+chdir :dir1
+localmake "allfiles files
+popdir
+repeat count :allfiles [
+  localmake "curfile item repcount :allfiles
+  if [1] = dllcall (list "L "MoveFileA "S (word :dir2 :curfile) "S (word :dir1 :curfile)) [(pr "移动文件 :curfile "成功)]
+]
+dllfree
+rmdir "release
+pr "安装完成
+pr "请访问官方文档获取hair框架使用帮助
+erasefile "hair_install.lgo
+windowfileedit "changelog.txt []
+end
+
+to zzz
+ifelse YesNoBox [Install Hair 安装程序] [Choose YES to run installation now, Choose NO to escape. 点击yes立即开始安装，点击no将会退出。] [copyfile] [exit]
+end
+
+Make "startup [zzz]

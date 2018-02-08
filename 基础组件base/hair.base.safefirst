@@ -1,0 +1,13 @@
+;对空字表取首会报错，而不是像pclogo那样返回一个空值
+;涉及到编码习惯不好处理
+;使用$first代替first
+;命令版本号v1.4
+
+to hair.base.safefirst :x
+hair.detect
+if empty? :x [
+  ifelse word? :x [op "] [op []]
+]
+op first :x
+end
+bury "hair.base.safefirst

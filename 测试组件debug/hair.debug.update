@@ -1,7 +1,7 @@
 ;不公开，用于开发环境拷贝调试
 
 to hair.debug.update [:l "wakaka]
-localmake "dir1 "C:\\Users\\Administrator\\Desktop\\我的坚果云\\logo工作文件\\1.3rebol版本\\
+localmake "dir1 "C:\\Users\\Administrator\\Desktop\\我的坚果云\\logo工作文件\\1.4cross版本\\
 localmake "dir2 "C:\\Program\ Files\ \(x86\)\\FMSLogo\\logolib2\\
 localmake "dir3 "C:\\Program\ Files\ \(x86\)\\FMSLogo\\Logolib\\
 chdir :dir2
@@ -23,7 +23,7 @@ if member? "hair.lgo :l [make "l $bm "hair.lgo :l make "l se :l "hair
   $rename "hair.lgo "hair
 ]
 ;对lib2存在的文件进行转码
-repeat count :l [ignore hair.base.shell (se [iconv -f utf-8 -t GBK] item repcount :l [>] word "gbk item repcount :l)]
+repeat count :l [ignore (hair.base.shell (se [iconv -f utf-8 -t GBK] item repcount :l [>] word "gbk item repcount :l) "nooutput "cmd) pr se "转码文件 item repcount :l]
 ;删除原来的文件
 chdir :dir3
 repeat count :l [if member? item repcount :l files [updatefile.name.val item repcount :l .erase]]

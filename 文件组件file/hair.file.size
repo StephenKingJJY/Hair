@@ -1,0 +1,16 @@
+;获取文件大小，不公开
+;使用fsizecheck
+;命令版本号v1.4
+
+to hair.file.size :file
+erasefile "size_temp.htxt
+ignore shell (se [cmd /c] (word "\" :hair_maindir "\\ :hair_res "\\fsizecheck.exe "\") :file [> size_temp.htxt])
+do.until [wait 1] [member? "size_temp.htxt files]
+openread "size_temp.htxt setread "size_temp.htxt
+localmake "hrdlist readword
+setread []
+close "size_temp.htxt
+erasefile "size_temp.htxt
+op :hrdlist
+end
+bury "hair.file.size
