@@ -1,0 +1,8 @@
+;该命令用来简化mod中的基础命令
+;命令版本号v1.2
+
+to hair.noconflict.repeat :list
+localmake "s :hair_symbol
+repeat count :list [catch "error [copydef word :s first (item repcount :list) last (item repcount :list)]]
+end
+bury "hair.noconflict.repeat

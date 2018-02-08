@@ -1,0 +1,8 @@
+;使用rebol/view解释器执行启动浏览器的指令
+;不公开
+;命令版本号v1.3
+
+to hair.rebol.browse :url
+(hair.rebol.do se "browse :url "rebol_view)
+end
+bury "hair.rebol.browse

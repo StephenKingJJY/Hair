@@ -1,0 +1,21 @@
+;该命令用来载入图片资源文件
+;请注意您必须在空白背景上使用这个命令
+;并请关注图片大小
+;成功时返回保存的bitindex
+;命令版本号v1.2
+
+to hair.resource.loadpic :n
+hair.detect
+localmake "restore BITINDEX
+hair.base.rename word :n ".hpic word :n ".bmp
+SETBITINDEX :hair_resource_piclimit
+localmake "size bitloadsize word :n ".bmp
+ask 40 [bitload word :n ".bmp]
+ask 40 [bitcut first :size last :size]
+SETBITINDEX :restore
+hair.base.rename word :n ".bmp word :n ".hpic
+queue "hair_resource_picidlist se :n :hair_resource_piclimit
+make "hair_resource_piclimit :hair_resource_piclimit + 1
+op :hair_resource_piclimit - 1
+end
+bury "hair.resource.loadpic

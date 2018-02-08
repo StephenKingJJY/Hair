@@ -1,0 +1,19 @@
+;file里面的命令
+;用来查看当前目录下所有的指定扩展名的文件
+;命令版本v1.2
+
+to hair.file.extension :e
+hair.detect
+op hair.file.extension.repeat files [] :e
+end
+to hair.file.extension.repeat :curfile :curfile2 :e
+if empty? :curfile [op :curfile2]
+localmake "exfile first :curfile
+if (count :exfile)>(count :e)+1 [
+  if :e = hair.base.delitem (count :exfile)-(count :e) :exfile [
+    make "curfile2 se :curfile2 :exfile
+  ]
+]
+op hair.file.extension.repeat bf :curfile :curfile2 :e
+end
+bury [hair.file.extension hair.file.extension.repeat]

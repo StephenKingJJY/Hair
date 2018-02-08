@@ -1,0 +1,12 @@
+;sql组件把指定的表输出到主目录
+;如果是debug状态下直接输出同步过程没跑完，如果是生产环境静默
+;命令版本号v1.2
+
+to hair.sql.save :hsql
+hair.detect
+if not empty? :hair_sql_async [hair.debug.error "请等待数据库同步结束 stop]
+if or (not member? "FMSLogo.exe files) (not member? "hair.package files) [hair.debug.error "无法保存在其他目录 stop]
+hair.base.copyfile word :hair_res "\\ :hsql :hsql
+pr word :hsql "数据库输出成功
+end
+bury "hair.sql.save

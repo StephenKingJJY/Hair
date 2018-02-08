@@ -1,0 +1,8 @@
+;pclogo时代tt在屏幕上输出文字命令
+;命令版本号v1.2
+
+to hair.old.tt :text
+hair.detect
+rt 90 label :text lt 90
+end
+bury "hair.old.tt

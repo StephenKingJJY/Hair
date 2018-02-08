@@ -1,0 +1,12 @@
+;不对外公开
+;代码版本v1.2
+;计时器system的执行select更新的过程代码
+;为了试图解决似乎是logo本身的bug
+
+to hair.background.timersystem
+if 200<count :hair_hook_index [hair.debug.error "钩子数组已使用超过200]
+if :hair_resource_piclimit > 1000 [hair.debug.error "图片缓存超出上限] ;bitindex超出警报
+make "hair_timeauth hair.base.timeauth ;创建时间戳
+make "hair_detect "false ;重置检测缓存
+end
+bury "hair.background.timersystem

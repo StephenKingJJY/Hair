@@ -1,0 +1,8 @@
+;不公开
+;解决button响应语句过长问题
+
+to hair.debug.tool.repeat2
+WINDOWCREATE "debugger "wintip "对象tip 0 0 120 100 []
+STATICCREATE "wintip "tipmessage thing (word "hair_object_ first LISTBOXGETSELECT "objlist "_tip) 0 0 120 50
+buttoncreate "wintip "end2 "关闭 50 70 20 10 [windowdelete "wintip]
+end

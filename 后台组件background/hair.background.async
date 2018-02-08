@@ -1,0 +1,8 @@
+;简单调用接口，用来给async变量增加新的运行语句
+;命令版本号v1.2
+
+to hair.background.async :co
+hair.detect
+make "hair_background_async lput :co :hair_background_async
+end
+bury "hair.background.async

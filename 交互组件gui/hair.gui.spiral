@@ -1,0 +1,11 @@
+;draw a spiral pattern
+;ARGUMENTS   : sides     (number of spiral sides)
+;              length    (length of each side)
+;              rotations (number of spiral rotations)
+;命令版本号v1.3
+
+to hair.gui.spiral :sides :length :rotations
+  hair.detect
+	repeat :rotations [ hair.gui.polygon :sides :length rt 360/:rotations ]
+End
+bury "hair.gui.spiral

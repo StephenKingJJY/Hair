@@ -1,0 +1,16 @@
+;解决shell命令存在的问题
+;通过bat文件中介的方式
+;与rebol不同的是，$shell将会在当前目录而不是资源目录下执行
+;命令版本v1.3
+
+to hair.base.shell :l
+hair.detect
+new "shell_file "file
+.name.val "shell_temp.bat
+.create
+.writepr :l
+localmake "_output shell [shell_temp.bat]
+hair.object.destroy "shell_file
+op :_output
+end
+bury "hair.base.shell

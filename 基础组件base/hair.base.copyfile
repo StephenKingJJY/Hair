@@ -1,0 +1,10 @@
+;提供简单的复制文件的功能
+;命令版本号v1.2
+
+to hair.base.copyfile :n1 :n2
+hair.detect
+dllload "Kernel32.dll
+ignore dllcall (list "L "CopyFileA "S :n2 "S :n1)
+dllfree
+end
+bury "hair.base.copyfile

@@ -1,0 +1,23 @@
+;对外公开的数据库选择
+;命令版本号v1.2
+;$sqlselect "zh_cn [:f1=2 and :f2=3]
+;支持所有可以被logo直接计算的表达式
+;data既可以支持表名也可以支持:data的形式，方便进行二次筛选
+
+to hair.sql.select :data :e
+hair.detect
+;判断是不是字
+ifelse word? :data [
+  ;如果是变量名则转化为数据
+  ifelse name? word "hair_sql_ :data [make "data bf arraytolist thing (word "hair_sql_ :data "_data)] [
+    hair.debug.error "select需要表名或者数组作为参数 stop]
+][ifelse not array? :data [hair.debug.error "select需要表名或者数组作为参数 stop][make "data arraytolist :data]]
+;当符合条件的时候，将得到的数组汇总
+localmake "sqlselect []
+localmake "sqlfieldnum count first :data
+repeat count :data [localmake "repdata repcount repeat :sqlfieldnum [make (word "f repcount) item repcount item :repdata :data]
+  if run :e [make "sqlselect lput item repcount :data :sqlselect]]
+repeat :sqlfieldnum [buryname word "f repcount]
+op listtoarray :sqlselect
+end
+bury "hair.sql.select

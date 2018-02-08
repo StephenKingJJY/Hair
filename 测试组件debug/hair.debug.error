@@ -1,0 +1,8 @@
+;修复条件语句的bug，使用error过程输出错误信息
+;命令版本号v1.2
+
+TO hair.debug.error :msg
+if word? :msg [make "msg (list :msg)]
+if :hair_debug [MESSAGEBOX [hair错误提示] :msg]
+END
+bury "hair.debug.error

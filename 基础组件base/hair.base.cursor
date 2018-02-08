@@ -1,0 +1,31 @@
+;设置客户区的光标
+;支持0表示隐藏，1表示普通箭头，15表示手形状
+;命令版本号v1.2
+
+to hair.base.cursor :cur_name
+  if not (or :cur_name = 15 :cur_name = 1 :cur_name = 0) [stop]
+
+  local [cur status hwnd]
+
+  ; Load the Windows User API client DLL
+  dllload "user32.dll
+  dllload "Kernel32.dll
+
+  make "hwnd dllcall [L FindWindowA S FMSLogo L 0]
+  
+  if :cur_name = 15 [make "cur dllcall [L LoadCursorA S IDC_ARROW L 0]]
+  
+  ;if :cur_name = 15 [make "cur dllcall [L LoadImageA W 0 W 0 W 0 S IMAGE_CURSOR L MAKEINTRESOURCE(OCR_NORMAL) L 0]]
+  ;if :cur_name = 1 [make "cur dllcall [L LoadImageA W 0 L IDC_ARROW L IMAGE_CURSOR W 0 W 0 W 0]]
+  make "status dllcall (list "L "GetLastError "V 0)
+  pr :status
+  
+  ; Set Cursor shape
+  ; SetClassLong(m_hWnd,GCL_HCURSOR,(long)cursor);
+  ;make "status dllcall (list "L "SetClassLongA "L :cur  "L "GCL_HCURSOR "L :hwnd)
+  
+  make "status dllcall (list "L "SetCursor "L :cur)
+
+  dllfree
+end
+bury "hair.base.cursor

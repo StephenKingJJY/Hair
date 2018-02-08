@@ -1,0 +1,9 @@
+;去掉参数的前几位
+;命令版本号v1.2
+
+TO hair.base.delitem :n :v
+if or :n<0 :n>count :v [hair.debug.error "参数错误 stop]
+if :n=0 [op :v]
+op hair.base.delitem :n-1 bf :v
+END
+bury "hair.base.delitem

@@ -1,0 +1,7 @@
+;hair框架注释留用
+;该命令不要求hair正在运行
+;命令版本号v1.2
+
+to hair.debug.' :a
+end
+bury "hair.debug.'

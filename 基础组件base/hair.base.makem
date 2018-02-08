@@ -1,0 +1,8 @@
+;该命令相当于make "v :v-1
+;命令版本号v1.2
+
+to hair.base.makem :v
+hair.detect
+make :v (thing :v) - 1
+end
+bury "hair.base.makem

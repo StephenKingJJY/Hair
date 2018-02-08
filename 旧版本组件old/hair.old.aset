@@ -1,0 +1,10 @@
+;重写pclogo时代的设置数组指令
+;命令版本号v1.2
+
+to hair.old.aset :a :v :c
+hair.detect
+if or (and list? :v 1=count :v) (and (not word? :a) (not array? :a)) [hair.debug.error "设置数组语法错误 stop]
+if word? :a [make "a thing :a]
+ifelse list? :v [mdsetitem map [? + 1] :v :a :c][setitem :v+1 :a :c]
+end
+bury "hair.old.aset

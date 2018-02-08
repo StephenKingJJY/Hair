@@ -1,0 +1,11 @@
+;钩子绑定函数，用于用户在实际项目中使用
+;命令版本号v1.2
+
+to hair.hook.bind :action_name :command
+hair.detect
+if :action_name = "all [hair.debug.error word :action_name "钩子函数非法 stop]
+localmake "action_id 1 + count :hair_hook_index
+ifelse not member? :action_name :hair_hook_index [make "hair_hook_index se :hair_hook_index :action_name][make "action_id hair.hook.getid :action_name] ;如果该过程被优先执行（即create过程尚未调用），则直接注册该钩子
+hair.old.aset :hair_hook_array :action_id-1 se (hair.old.aget :hair_hook_array :action_id-1) :command
+end
+bury "hair.hook.bind

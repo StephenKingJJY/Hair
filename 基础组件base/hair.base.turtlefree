@@ -1,0 +1,10 @@
+;获取一个空闲的海龟编号
+;命令版本号v1.2
+
+to hair.base.turtlefree
+hair.detect
+local "i
+for [i 40 1000] [if not member? :i :hair_turtle [make "hair_turtle se :hair_turtle :i op :i]]
+hair.debug.error "海龟使用超出上限
+end
+bury "hair.base.turtlefree

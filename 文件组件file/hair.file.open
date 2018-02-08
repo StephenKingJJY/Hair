@@ -1,0 +1,9 @@
+;命令版本号v1.2
+;file组件中用来做open模式判断，并给出提示消息
+
+
+to hair.file.open :name
+if not member? :name files [hair.debug.error (se "当前目录下没有 :name "请尝试使用find匹配模式) op "false]
+op "true
+end
+bury "hair.file.open

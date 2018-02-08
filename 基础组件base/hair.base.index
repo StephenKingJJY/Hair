@@ -1,0 +1,15 @@
+;查找元素在表中的位置
+;版本v1.2
+
+to hair.base.index :v :list
+hair.detect
+op hair.base.index.repeat :v 1 :list
+end
+
+to hair.base.index.repeat :v :n :list
+if empty? :list [op 0]
+if :v = first :list [op :n]
+op hair.base.index.repeat :v :n+1 bf :list
+end
+
+bury [hair.base.index hair.base.index.repeat]

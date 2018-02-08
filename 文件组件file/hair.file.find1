@@ -1,0 +1,21 @@
+;不公开
+;用于find模式查找文件并跳转目录
+;查找不到就直接切换回主目录
+;命令版本v1.2
+
+to hair.file.find1 :fileobj
+localmake "_filepath run word :fileobj "._path
+if not empty? :_filepath [foreach :_filepath [chdir ?] op "true]
+if not member? run word :fileobj ".name hair.base.allfiles [make (word "hair_object_ :fileobj "__path) [] hair.debug.error (se "find模式找不到 (run word :fileobj ".name) "文件) op "false]
+make "_allfiles_list [] catch "end [hair.file.find1.repeat run word :fileobj ".name]
+make (word "hair_object_ :fileobj "__path) :_allfiles_list
+op "true
+end
+to hair.file.find1.repeat :filename
+if member? :filename files [throw "end]
+if 2=count directories [make "_allfiles_list bl :_allfiles_list popdir stop]
+repeat (count directories)-2 [make "_allfiles_list se :_allfiles_list item repcount+2 directories chdir item repcount+2 directories hair.file.find1.repeat :filename]
+popdir make "_allfiles_list bl :_allfiles_list
+end
+bury [hair.file.find1 hair.file.find1.repeat]
+buryname "_allfiles_list

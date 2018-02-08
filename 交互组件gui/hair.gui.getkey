@@ -1,0 +1,14 @@
+;获取下次按键
+;如果在上次调用getkey后已经被按了按键，则立即返回，否则就一直等待按键
+;命令版本号v1.3
+
+to hair.gui.getkey
+hair.detect
+forever [
+		if not 0 = count :hair_gui_keybuffer [
+			localmake "key first :hair_gui_keybuffer
+			make "hair_gui_keybuffer butfirst :hair_gui_keybuffer
+			output :key ]
+		wait 1 ]
+end
+bury "hair.gui.getkey

@@ -1,0 +1,10 @@
+;该命令用来重命名文件
+;命令版本号v1.2
+
+to hair.base.rename :n1 :n2
+hair.detect
+dllload "Kernel32.dll
+ignore dllcall (list "L "MoveFileA "S :n2 "S :n1)
+dllfree
+end
+bury "hair.base.rename

@@ -1,0 +1,16 @@
+;sql组件用来创建新表
+;目前的想法是用数组的形式储存
+;命令版本号v1.3
+;通过mode指定是否同步到资源文件夹
+
+to hair.sql.create :tablename :field [:mode "async]
+hair.detect
+if name? word "hair_sql_ :tablename [hair.debug.error "数据库名称已被占用 stop]
+make word "hair_sql_ :tablename :field
+make (word "hair_sql_ :tablename "_data) hair.old.array se 1 (count :field)/2
+hair.hook.bind "hair_exit (se "bury (word "hair_sql_ :tablename) "bury (word "hair_sql_ :tablename "_data))
+if :mode = "async [
+  make "hair_sql_async lput hair.object.replace :tablename [if not member? (word __name ".hsql) files [sql_async.name.val word __name ".hsql .create .writepr __x]] se 3 :field :hair_sql_async
+]
+end
+bury "hair.sql.create

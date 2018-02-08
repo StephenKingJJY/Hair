@@ -1,0 +1,10 @@
+;重写pclogo时代的创建数组指令
+;命令版本号v1.2
+
+to hair.old.array :v
+hair.detect
+if number? :v [op array :v stop]
+if and list? :v 1<count :v [op mdarray :v stop]
+hair.debug.error "数组定义语法不正确
+end
+bury "hair.old.array

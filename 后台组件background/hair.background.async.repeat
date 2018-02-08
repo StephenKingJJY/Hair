@@ -1,0 +1,14 @@
+;支持让其他程序简单使用data计时器创建异步语句
+;异步语句同其他语句一样需要需要简短的执行时间
+;命令版本号v1.2
+;与直接使用data的钩子不同的是，异步语句不会反复执行
+;不公开
+
+to hair.background.async.repeat
+if empty? :hair_background_async [stop]
+localmake "_co first :hair_background_async
+make "hair_background_async bf :hair_background_async
+run :_co
+;不递归每次只执行一条语句
+end
+bury "hair.background.async.repeat

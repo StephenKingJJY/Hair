@@ -1,0 +1,18 @@
+;使用shell控制blat发送邮件
+;命令版本号码v1.3
+
+to hair.mail.send :to :subject :body [:charset "GB2312]
+hair.detect
+if or (not member? "FMSLogo.exe files) (not member? "hair.package files) [stop]
+chdir :hair_res
+ignore hair.base.shell (se :hair_mail_exe [-install] :hair_mail_smtp :hair_mail_username :hair_mail_retry :hair_mail_port)
+wait 50
+new "mailfile "file
+.name.val "mail_temp.txt
+.create
+.writepr :body
+destroy "mailfile
+ignore hair.base.shell (se :hair_mail_exe [mail_temp.txt -to] :to [-s] :subject [-u] :hair_mail_username [-pw] (word "\" :hair_mail_password "\") [-charset] :charset)
+popdir
+end
+bury "hair.mail.send

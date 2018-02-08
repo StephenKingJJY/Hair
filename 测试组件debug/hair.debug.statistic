@@ -1,0 +1,37 @@
+;统计代码总行数、总文件数，显示结果时输出统计时间
+;可以对外，即从Logolib下找所有hair开头的文件
+;命令版本号v1.3
+;后期可以加上完整性检测
+
+to hair.debug.statistic
+hair.detect
+if not member? "Logolib DIRECTORIES [hair.debug.error _e "找不到logolib目录 stop]
+chdir "Logolib
+localmake "__starttime timemilli
+localmake "__coderow 0
+localmake "__codefile 0
+localmake "__allfiles hair.base.allfiles
+new "statisticfile "file
+repeat count :__allfiles [localmake "__curfile item repcount :__allfiles
+  if 3 < count :__curfile [
+  if "hair = hair.base.getitem 4 :__curfile [
+    hair.base.makep "__codefile
+    statisticfile.name.val :__curfile
+    pr se _e "检查文件 :__curfile
+    make "__coderow :__coderow + hair.debug.statistic.repeat 0
+  ]
+]]
+destroy "statisticfile
+popdir
+pr (se _e "当前的hair框架版本为 :hair_version _e "代码总行数 :__coderow _e "文件总数 :__codefile)
+pr (se _e "统计用时 timemilli-:__starttime "ms)
+end
+
+to hair.debug.statistic.repeat :row
+;单独来判断某个文件的行数
+if statisticfile.eof? [op :row]
+localmake "wakka statisticfile.readlist
+op hair.debug.statistic.repeat :row+1
+end
+
+bury [hair.debug.statistic hair.debug.statistic.repeat]

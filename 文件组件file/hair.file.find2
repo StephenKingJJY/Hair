@@ -1,0 +1,9 @@
+;不公开
+;版本号v1.2
+;用于搜寻find目录之后回退到原本的目录，通常是fmslogo的程序目录
+
+to hair.file.find2 :path
+if empty? :path [stop]
+repeat count :path [popdir]
+end
+bury "hair.file.find2

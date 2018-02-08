@@ -1,0 +1,17 @@
+;根据类型选择对象
+;新的逻辑可能会导致select的效率很低
+;命令版本号v1.2
+
+to hair.object.select :class
+hair.detect
+localmake "currentrestore :hair_object_current
+localmake "classall []
+repeat count :hair_object_list [queue "classall run (list word item repcount :hair_object_list ".class)]
+ifelse member? :currentrestore :hair_object_list [hair.object.refresh :currentrestore] [(hair.object.refresh :currentrestore "class)]
+localmake "objall []
+repeat count :classall [if (item repcount :classall) = :class [queue "objall repcount]]
+make "classall []
+repeat count :objall [queue "classall item (item repcount :objall) :hair_object_list]
+op :classall
+end
+bury "hair.object.select

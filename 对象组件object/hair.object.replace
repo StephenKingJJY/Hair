@@ -1,0 +1,46 @@
+;通常用来替换this关键字(我想也仅仅应该支持字符串的匹配)
+;根据新逻辑应该支持替换指定字符串，例如new中的cancel，以及经常会在定义中出现的__name(包括__x)
+;type=1 意思是对this进行替换，type=2 意思是cancel，type=3 意思是__name
+;该指令为对象模块内部指令，不对外公开，不需要检查hair运行，希望有人可以帮忙优化
+;已知bug包括括号必须要与文本用空格分开，才能正确识别括号紧挨着的文本。
+;命令版本号v1.2
+
+to hair.object.replace :objname :string :type
+if number? :string [op :string]
+if word? :string [op hair.object.replace.repeat :objname :string :type]
+op hair.object.replace.foreach :objname [] :string :type
+end
+
+to hair.object.replace.foreach :objname :left :right :type
+;遍历表
+if empty? :right [op :left]
+localmake "center first :right
+local "temp
+if number? :center [make "temp :center]
+if list? :center [make "temp hair.object.replace.foreach :objname [] :center :type]
+if word? :center [make "temp hair.object.replace.repeat :objname :center :type]
+op hair.object.replace.foreach :objname se :left (list :temp) bf :right :type
+end
+
+to hair.object.replace.repeat :objname :value :type
+;遍历字
+;对this进行识别
+if :type=1 [if :value = "this [op :objname]
+  if :value = first [(this] [op word first [(] :objname]
+  if :value = first [this)] [op word :objname first [)]]
+  if (count :value)>4 [if "this. = hair.base.getitem 5 :value [op (word :objname ". hair.base.delitem 5 :value)]]]
+;对cancel进行识别
+;cancel因为基本上是用户在定义的时候使用，所以有较大概率与括号相连，考虑在文档中提示已知bug
+;这里cancel的替换主要用在监听变量变化时还原
+if and (first :type)=2 :value="cancel [op last :type]
+;这里先做保留.....
+;对__name及__x进行识别
+;通常__name是单独在表中出现的，比如和word出现在一起，用在定义对象相关过程的时候，而且其一般不会作为结尾，即与)相连
+if and (first :type)=3 :value="__name [op QUOTED :objname]
+if and (first :type)=3 :value = "__x [op quoted last :type]
+;奇怪的语法，应对新出现的情况，即在type里面保留需要定义的方法或者属性的名称，单独写3也不会出问题
+;不在所有的替换要求内
+op :value
+end
+
+bury [hair.object.replace hair.object.replace.foreach hair.object.replace.repeat]

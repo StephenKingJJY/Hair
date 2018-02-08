@@ -1,0 +1,24 @@
+;该命令用来根据bitindex显示载入的图片资源文件
+;搭配mask显示透明背景,mask不能为0（为了处理piccanvas）
+;命令版本号v1.3
+
+to hair.resource.drawpicwithmask :i1 :i2
+if :i2=0 [stop]
+hair.detect
+localmake "__restore BITINDEX
+SETBITINDEX :i1
+localmake "__bitsize bitsize
+setbitindex :hair_resource_piclimit
+bitcopy first :__bitsize last :__bitsize
+setbitindex :i2
+setbitmode 3
+bitpastetoindex :hair_resource_piclimit 0 0
+setbitindex :i1
+setbitmode 2
+bitpastetoindex :hair_resource_piclimit 0 0
+setbitindex :hair_resource_piclimit
+setbitmode 1
+bitpaste
+SETBITINDEX :__restore
+end
+bury "hair.resource.drawpicwithmask

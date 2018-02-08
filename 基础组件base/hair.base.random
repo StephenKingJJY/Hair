@@ -1,0 +1,17 @@
+;处理随机函数的小数问题
+;给内置的随机函数增加小数位数和起止点的参数
+;命令版本号v1.3
+
+to hair.base.random :s :e
+hair.detect
+localmake "sew hair.base.max se (hair.base.random.repeat :s 0) (hair.base.random.repeat :e 0)
+op :s + (random :e*:sew-:s*:sew)/:sew
+end
+
+to hair.base.random.repeat :n :w
+;判断小数位数
+if :n=int :n [op :w]
+op hair.base.random.repeat :n*10 :w+1
+end
+
+bury "hair.base.random

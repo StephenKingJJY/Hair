@@ -1,0 +1,8 @@
+;生成时间戳
+;命令版本号v1.2
+
+to hair.base.timeauth 
+  localmake "t item 4 time
+  op ((hair.base.getitem 2 :T) * 3600) + ((hair.base.getitem 2 hair.base.delitem 3 :T) * 60) + hair.base.delitem 6 :T
+end
+bury "hair.base.timeauth

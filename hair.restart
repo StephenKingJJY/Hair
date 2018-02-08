@@ -1,0 +1,7 @@
+;命令版本号v1.2
+
+to hair.restart [:debug "true]
+hair.exit
+(hair :debug)
+end
+bury "hair.restart

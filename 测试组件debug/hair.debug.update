@@ -1,0 +1,39 @@
+;不公开，用于开发环境拷贝调试
+
+to hair.debug.update [:l "wakaka]
+localmake "dir1 "C:\\Users\\Administrator\\Desktop\\我的坚果云\\logo工作文件\\1.3rebol版本\\
+localmake "dir2 "C:\\Program\ Files\ \(x86\)\\FMSLogo\\logolib2\\
+localmake "dir3 "C:\\Program\ Files\ \(x86\)\\FMSLogo\\Logolib\\
+chdir :dir2
+foreach files [erasefile ?]
+chdir :dir1
+if not list? :l [make "l hair.base.allfiles foreach [changelog.txt hair_install.lgo hair.package] [make "l $bm ? :l]]
+new "updatefile "file
+.matchmode.val "find
+repeat count :l [.name.val item repcount :l .copy word :dir2 item repcount :l]
+;先拷贝iconv到lib2
+chdir :dir2
+popdir
+.matchmode.val "open
+.name.val "iconv.exe
+.copy word :dir2 "iconv.exe
+chdir :dir2
+;处理hair.lgo的例外
+if member? "hair.lgo :l [make "l $bm "hair.lgo :l make "l se :l "hair
+  $rename "hair.lgo "hair
+]
+;对lib2存在的文件进行转码
+repeat count :l [ignore hair.base.shell (se [iconv -f utf-8 -t GBK] item repcount :l [>] word "gbk item repcount :l)]
+;删除原来的文件
+chdir :dir3
+repeat count :l [if member? item repcount :l files [updatefile.name.val item repcount :l .erase]]
+;拷贝新文件
+chdir :dir2
+ifelse 3 > count :l [repeat count :l [do.until [wait 10] [member? item repcount :l files] updatefile.name.val word "gbk item repcount :l .copy word :dir3 item repcount :l]][
+  repeat count :l [updatefile.name.val word "gbk item repcount :l .copy word :dir3 item repcount :l]
+]
+hair.object.destroy "updatefile
+popdir
+pr "done!
+end
+bury "hair.debug.update

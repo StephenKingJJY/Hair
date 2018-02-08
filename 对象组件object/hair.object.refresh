@@ -1,0 +1,15 @@
+;刷新current对应的对象的方法简化
+;命令版本1.2
+;不对外
+
+to hair.object.refresh :name [:type "object]
+;创建类的时候也可以作为一个对象简化操作，刷新所有创建类相关的方法
+;注意不能用错对象相关的指令，否则不好debug
+if not :name = "hair_object_current [
+  make "hair_object_current :name
+  ifelse :type = "object [localmake "_ref thing (word "hair_object_ :name "_tip)][localmake "_ref [.attr .method .before .after .listen .inherit]]
+  repeat count :_ref [copydef item repcount :_ref word :name item repcount :_ref]
+  ;foreach run word :name ". [copydef ? word :name ?]
+]
+end
+bury "hair.object.refresh

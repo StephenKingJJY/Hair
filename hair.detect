@@ -1,0 +1,14 @@
+;该文件被允许在无hair框架时运行
+;我们推荐所有的工程项目都打包该过程，以判断框架是否载入并显示提示。
+;命令版本号v1.2
+
+to hair.detect
+if name? "hair_detect [if :hair_detect [stop]]
+make "hair_detect hair.base.checkbg
+if not :hair_detect [
+	ifelse YesNoBox [hair未运行] [您尚未启动hair框架，是否启动以使用需框架支持的程序？] [
+		if PROCEDURE? "hair [hair] [pr "hair框架未安装 halt]] [
+		halt]
+]
+end
+bury "hair.detect

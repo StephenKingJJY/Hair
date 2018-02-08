@@ -1,0 +1,11 @@
+;取出数字表中的最小项
+;命令版本号v1.2
+
+to hair.base.min :list
+hair.detect
+op reduce "hair.base.min.repeat :list
+end
+to hair.base.min.repeat :a :b
+op ifelse :a < :b [:a] [:b]
+end
+bury [hair.base.min hair.base.min.repeat]

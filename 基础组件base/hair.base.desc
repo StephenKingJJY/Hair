@@ -1,0 +1,7 @@
+;倒序排列表
+;命令版本号v1.2
+
+to hair.base.desc :list
+op (sort :list "greaterp)
+end
+bury "hair.base.desc

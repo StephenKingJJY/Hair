@@ -1,0 +1,41 @@
+;销毁对象
+;命令版本号v1.2
+
+to hair.object.destroy :name
+hair.detect
+if not member? :name :hair_object_list [hair.debug.error "对象名不存在 stop]
+;如果有after内容则调用，从new直接转过来的是没有定义after的
+if name? (word "hair_object_ :name "_after) [
+  localmake "_cancel 0
+  catch "cancel [run thing (word "hair_object_ :name "_after) make "_cancel 1]
+  if :_cancel = 0 [stop]
+  ]
+;不被cancel则执行下面的删除操作
+;删除不在tip里面的东西，对象表、after、对象过程
+make "hair_object_list remove :name :hair_object_list
+bury (word "hair_object_ :name "_after)
+;因为是否是对象这里做了判断，所以需要对对象名过程做直接删除
+er :name
+;根据tip删除相关内容，无视属性和方法的区别
+localmake "tip_temp thing (word "hair_object_ :name "_tip)
+repeat count :tip_temp [
+  ;与regdot一一对应，首先删除属性的实际变量，此版本不考虑简化过程的问题
+  bury (word "hair_object_ :name "_ bf item repcount :tip_temp)
+  ;删除输出变量或方法内容的过程
+  bury (word :name item repcount :tip_temp)
+  ;删除赋值过程
+  bury (word :name item repcount :tip_temp ".value)
+  bury (word :name item repcount :tip_temp ".val)
+  ;删除输出修改前变量内容的过程
+  bury (word :name item repcount :tip_temp ".h)
+  ;删除取消属性变动的cancel过程
+  bury (word :name item repcount :tip_temp ".cancel)
+]
+;删除tip
+bury (word "hair_object_ :name "_tip)
+bury word :name ".
+end
+to cancel
+throw "cancel
+end
+bury [hair.object.destroy cancel]

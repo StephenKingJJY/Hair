@@ -1,0 +1,34 @@
+;帮助用户生成一份可传播的生产版本的基于hair框架的fmslogo程序
+;并在其他的logo窗口中打开
+;build之后会新建一个基于project对象名的文件夹，并在其中拷贝分发所必须的hair.package文件、各类组件的package文件、hair资源文件夹等
+;命令版本号v1.2
+
+to hair.debug.build
+hair.detect
+localmake "hair_stpro run word first hair.object.select "project ".startup
+localmake "hair_stdep run word first hair.object.select "project ".depend
+localmake "hair_stobj run word first hair.object.select "project ".objname
+if not PROCEDURE? :hair_stpro [hair.debug.error "找不到入口过程 stop]
+messagebox [警告][您正在试图生成一个hair程序，请确保在build之前已经进行过hair.debug.test的调试。与test不同的是，build后生成的程序
+  将会使用一份为生产环境专门设计的压缩版本的hair框架，系统会拷贝您所需要的所有组件的package文件、hair资源文件到以您的项目名称命名的文件夹下，
+  此时您可以打包该文件夹在没有安装hair框架的fmslogo环境下运行该过程了。确定以保证接受上述信息！]
+pr "清理hair框架中..
+hair.exit
+pr "框架清理完成..即将删除下面的变量和plist，请确保已将其写入过程中
+localmake "hair_debug_build (list [] item 2 contents last contents)
+
+;注意此处删除变量应该排除上述定义系列
+
+show :hair_debug_build
+bury :hair_debug_build
+pr "删除完成，下面的过程将作为您的项目被打包...
+show remove "hair.debug.test first contents
+make "startup [load "hair.package foreach :hair_stdep [load word ? ".package] hair run :hair_stpro]
+mkdir :hair_stobj
+savel (se (list remove "hair.debug.test first contents) bf contents) word :hair_stobj ".lgo
+pr "拷贝资源文件，创建快捷方式...
+
+
+
+end
+bury "hair.debug.build

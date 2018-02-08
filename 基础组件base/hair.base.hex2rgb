@@ -1,0 +1,20 @@
+;实现16进制转rgb的功能
+;命令版本号v1.3
+
+to hair.base.hex2rgb :hex
+hair.detect
+if "# = first :hex [make "hex bf :hex]
+localmake "myrgb []
+repeat 3 [queue "myrgb hair.base.hex2rgb.repeat hair.base.getitem 2 :hex make "hex bf bf :hex]
+op :myrgb
+end
+to hair.base.hex2rgb.repeat :hex
+localmake "hexfirst first :hex
+localmake "hexlast last :hex
+ifelse and (ascii :hexfirst)<103 (ascii :hexfirst)>96 [make "hexfirst (ascii :hexfirst)-87][
+if and (ascii :hexfirst)<71 (ascii :hexfirst)>64 [make "hexfirst (ascii :hexfirst)-55]]
+ifelse and (ascii :hexlast)<103 (ascii :hexlast)>96 [make "hexlast (ascii :hexlast)-87][
+if and (ascii :hexlast)<71 (ascii :hexlast)>64 [make "hexlast (ascii :hexlast)-55]]
+op :hexfirst*16+:hexlast
+end
+bury [hair.base.hex2rgb hair.base.hex2rgb.repeat]

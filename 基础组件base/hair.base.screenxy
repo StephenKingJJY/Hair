@@ -1,0 +1,12 @@
+;输入logo坐标系的坐标值
+;输出左上角为原点坐标系的坐标值
+;命令版本号v1.3
+
+TO hair.base.screenxy :xy
+hair.detect
+localmake "logoxy hair.object.select "Project
+if empty? :logoxy [hair.debug.error _e "项目对象尚未创建 stop]
+op se (run word first :logoxy ".width)/2+first :xy (run word first :logoxy ".height)/2-last :xy
+END
+
+bury "hair.base.screenxy

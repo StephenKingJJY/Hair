@@ -1,0 +1,30 @@
+;判断两个矩形画布是否冲突，logo坐标
+;不对外公开
+;实际上是v1碰撞检测的改写，同时也支持现在的碰撞检测，但是不对外公开
+;使用的是公开的inrange方法
+;判断的方法是两个画布的八个点都不能在对方的区域内
+;命令版本号v1.3
+;true为不冲突，false为冲突
+
+to hair.gui.collision :xy1 :wh1 :xy2 :wh2
+;首先计算出四个点来
+localmake "xxyy1 []
+queue "xxyy1 :xy1 ;左上角
+queue "xxyy1 se (first :xy1) + (first :wh1) last :xy1 ;右上角
+queue "xxyy1 se first :xy1 (last :xy1) - (last :wh1) ;左下角
+queue "xxyy1 se (first :xy1) + (first :wh1) (last :xy1) - (last :wh1) ;右下角
+;判断这四个点不在对方范围内，任何一个在范围内就直接停掉
+foreach :xxyy1 [if hair.gui.inrange ? :xy2 first :wh2 last :wh2 [op "false]]
+;计算另外四个点
+localmake "xxyy2 []
+queue "xxyy2 :xy2 ;左上角
+queue "xxyy2 se (first :xy2) + (first :wh2) last :xy2 ;右上角
+queue "xxyy2 se first :xy2 (last :xy2) - (last :wh2) ;左下角
+queue "xxyy2 se (first :xy2) + (first :wh2) (last :xy2) - (last :wh2) ;右下角
+;判断这四个点不在对方范围内，任何一个在范围内就直接停掉
+foreach :xxyy2 [if hair.gui.inrange ? :xy1 first :wh1 last :wh1 [op "false]]
+;如果全部不在，则输出不冲突
+op "true
+end
+
+bury "hair.gui.collision

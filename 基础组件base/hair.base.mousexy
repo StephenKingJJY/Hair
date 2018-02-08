@@ -1,0 +1,9 @@
+;输出左上角为原点的坐标系值
+;命令版本号码v1.3
+
+TO hair.base.mousexy
+hair.detect
+op hair.base.screenxy mousepos
+END
+
+bury "hair.base.mousexy

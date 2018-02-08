@@ -1,0 +1,16 @@
+;pclogo时代设置字体和字号的指令
+;命令版本号v1.3
+;colour  (optional font colour, default current SETPENCOLOR)
+;effects (optional word including any of "B, "U or "I, for
+;         bold, underlined or italic)
+
+to hair.old.setfont :height :width [:font []] [:colour []] [:effects []]
+hair.detect
+  if emptyp :font [ make "font [Courier] ]
+	if not emptyp :colour [setpencolor :colour]
+	ifelse memberp "B :effects [ localmake "bold 900 ] [ localmake "bold 0 ]
+	ifelse memberp "I :effects [ localmake "italic 1 ] [ localmake "italic 0 ]
+	ifelse memberp "U :effects [ localmake "underline 1 ] [ localmake "underline 0 ]
+	setlabelfont (list :font :height :width 0 :bold :italic :underline)
+end
+bury "hair.old.setfont

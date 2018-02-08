@@ -1,0 +1,33 @@
+;sql组件从当前目录载入hsql保存的表
+;命令版本号v1.3
+
+to hair.sql.load :hsql [:mode "async]
+hair.detect
+new "sqlfileobj "File
+if word? :hsql [hair.sql.load.repeat :hsql :mode]
+if list? :hsql [repeat count :hsql [hair.sql.load.repeat item repcount :hsql :mode]]
+destroy "sqlfileobj
+end
+
+to hair.sql.load.repeat :hsql :mode
+;获取文件名称
+localmake "sqlloadtablename hair.base.getitem (count :hsql)-5 :hsql
+;读取字段配置信息
+sqlfileobj.name.val :hsql
+localmake "sqlloadfield .readlist
+;(hair.sql.create tablename field&defaultvalue :mode) 内存中创建新表
+(hair.sql.create :sqlloadtablename :sqlloadfield :mode)
+;读取具体数据
+localmake "sqlloadfield _replaceattr2 :sqlloadfield
+do.until [(hair.sql.insert :sqlloadtablename (map.se "list :sqlloadfield sqlfileobj.readlist) :mode)] [sqlfileobj.eof?]
+if :hair_debug [(pr :hsql "表数据读取成功)]
+end
+
+;删除temp中所有的偶数项，即属性表中所有的属性内容，保留属性的名称
+to _replaceattr2 :temp
+if (count :temp)<2 [op :temp]
+localmake "counttemp (count :temp)/2
+for [i 1 :counttemp][make "temp hair.base.bmitem :i*2-:i+1 :temp]
+op :temp
+END
+bury [hair.sql.load hair.sql.load.repeat _replaceattr2]
