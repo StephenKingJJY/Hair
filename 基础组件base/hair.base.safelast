@@ -1,0 +1,13 @@
+;对空字表取尾会报错，而不是像pclogo那样返回一个空值
+;涉及到编码习惯不好处理
+;使用$last代替last
+;命令版本号v1.4
+
+to hair.base.safelast :x
+hair.detect
+if empty? :x [
+  ifelse word? :x [op "] [op []]
+]
+op last :x
+end
+bury "hair.base.safelast

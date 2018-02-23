@@ -1,0 +1,26 @@
+1.3d和动画
+2.变量管理varmanager和模块引擎package
+3.chart组件\table组件
+4.雪碧图
+5.build和test、edit等debug功能加强，打包时可以选择多个模块或者命令行模式
+6.hairserver，提供ftp和web服务，post，轮询处理web和ftp之外的事情b/s系统
+7.优化文件模块速度，iconv
+8.使用hair框架制作了一个hair自身的编辑器
+9.gui input
+
+模块化引擎
+引擎所需的文件放在logolib下面
+package.main
+package.module
+package.import
+package.end
+package.map
+
+
+package.import "server
+package.import "xml
+...
+package.main "hair
+
+
+package.end

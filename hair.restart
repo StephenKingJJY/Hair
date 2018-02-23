@@ -1,7 +1,8 @@
-;命令版本号v1.2
+;命令版本号v1.4
 
-to hair.restart [:debug "true]
+to hair.restart
+;先退出再重新进入
 hair.exit
-(hair :debug)
+hair
 end
 bury "hair.restart

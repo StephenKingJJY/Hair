@@ -1,16 +1,43 @@
-;解决shell命令存在的问题
-;通过bat文件中介的方式
-;与rebol不同的是，$shell将会在当前目录而不是资源目录下执行
-;命令版本v1.3
+;增加回调功能
+;命令版本v1.4
+;提供四种模式cmd（最快速），bat（兼容），vbs（静默），bat+vbs（兼容+静默，最慢）
+;如果l为字，则视为一个文件名，如果为表，则视为一个表
 
-to hair.base.shell :l
+to hair.base.shell :l [:callback "nooutput] [:mode "cmd] [:waitfile "nooutput]
 hair.detect
 new "shell_file "file
-.name.val "shell_temp.bat
-.create
-.writepr :l
-localmake "_output shell [shell_temp.bat]
-hair.object.destroy "shell_file
-op :_output
+ifelse word? :l [
+  localmake "_output shell :l
+][
+if :mode = "cmd [localmake "_output shell se [cmd /c] :l]
+if :mode = "bat [
+  .name.val "shell_temp.bat
+  .create
+  .writepr :l
+  localmake "_output shell [shell_temp.bat]
+]
+if :mode = "vbs [
+  .name.val "shell_temp.vbs
+  .create
+  .writepr (se [createobject("wscript.shell").run "cmd /c] :l [",0])
+  localmake "_output shell [wscript shell_temp.vbs]
+]
+if :mode = "batvbs [
+  .name.val "shell_temp.bat
+  .create
+  .writepr :l
+  .name.val "shell_temp.vbs
+  .create
+  .writepr [createobject("wscript.shell").run "shell_temp.bat",0]
+  localmake "_output shell [wscript shell_temp.vbs]
+]]
+if :callback = "nooutput [if not :mode = "cmd [.erase] hair.object.destroy "shell_file op :_output]
+.name.val :callback
+ifelse :waitfile = "nooutput [
+  do.until [wait 1] [member? :callback files]][
+  do.until [wait 1] [member? :waitfile files]
+]
+make "_output .readrawline
+.erase hair.object.destroy "shell_file op :_output
 end
 bury "hair.base.shell

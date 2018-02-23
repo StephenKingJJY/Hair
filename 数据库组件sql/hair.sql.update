@@ -23,4 +23,4 @@ repeat (count thing (word "hair_sql_ :tablename "_data))-1 [
 ;清除使用到的f1参数等
 repeat :sqlfieldnum [buryname word "f repcount]
 end
-bury "hair.sql.updates
+bury "hair.sql.update

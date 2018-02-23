@@ -1,11 +1,8 @@
 ;取出数字表中的最大项
-;命令版本号v1.2
+;命令版本号v1.4
 
 to hair.base.max :list
 hair.detect
-op reduce "hair.base.max.repeat :list
+op last sort :list
 end
-to hair.base.max.repeat :a :b
-op ifelse :a > :b [:a] [:b]
-end
-bury [hair.base.max hair.base.max.repeat]
+bury "hair.base.max

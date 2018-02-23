@@ -14,4 +14,4 @@ if :n=int :n [op :w]
 op hair.base.random.repeat :n*10 :w+1
 end
 
-bury "hair.base.random
+bury [hair.base.random hair.base.random.repeat]
