@@ -59,6 +59,7 @@ catch "error [copydef word :s "turtlefree    "hair.base.turtlefree ];--$turtlefr
 catch "error [copydef word :s "whatdir       "hair.base.whatdir  ];--$whatdir            获取当前目录
 
 ;object类指令系列
+catch "error [copydef word :s "class?        "hair.object.classp ];--$class? :name       判断字符串是否为类
 catch "error [copydef word :s "object?       "hair.object.p      ];--$object? :name      判断字符串是否为对象
 catch "error [copydef word :s "select        "hair.object.select ];--$select :class      输出所有指定类型的对象
 
@@ -86,6 +87,7 @@ catch "error [copydef word :s "hook          "hair.hook.bind     ];--$hook == ho
 catch "error [copydef word :s "destroy       "hair.object.destroy];--$destroy == destroy
 catch "error [copydef word :s "new           "hair.object.new    ];--$new == new
 catch "error [copydef word :s "objectp       "hair.object.p      ];--$objectp == $object?
+catch "error [copydef word :s "classp        "hair.object.classp ];--$classp == $class?
 
 end
 bury "hair.noconflict

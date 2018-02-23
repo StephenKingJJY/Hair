@@ -39,5 +39,14 @@ if not member? "inherit :hair_object_havedefine [define ".inherit [[][]] queue "
 ;刷新简化对象
 (hair.object.refresh :name "class)
 
+;退出时删除所有相关的过程
+hair.hook.bind "hair_exit se "bury quoted :name
+hair.hook.bind "hair_exit se "bury quoted word :name ".
+hair.hook.bind "hair_exit se "bury quoted word :name ".attr
+hair.hook.bind "hair_exit se "bury quoted word :name ".before
+hair.hook.bind "hair_exit se "bury quoted word :name ".after
+hair.hook.bind "hair_exit se "bury quoted word :name ".listen
+hair.hook.bind "hair_exit se "bury quoted word :name ".method
+hair.hook.bind "hair_exit se "bury quoted word :name ".inherit
 end
 bury "hair.object.class

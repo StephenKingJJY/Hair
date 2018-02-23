@@ -2,43 +2,43 @@
 ;实现对文件读写操作封装
 ;命令版本号V1.4
 ;如果find模式不能正确匹配到文件，通常这是由于不同目录下存在相同的文件名，可以通过修改_path来指定目录
-;增加输出文件大小，copyx模式，iconv，find路径优化，7z压缩
+;增加输出文件大小，iconv，find路径优化，7z压缩
 
 to hair.file.reg
 make "hair.file_require 1.2
 make "hair.file_noconflict [[extension hair.file.extension]]
 hook "hair_exit [closeall]
 new "File "Class
-  .attr [name hair_dribble.txt matchmode open position 0 _path []]
+  .attr [name nosuchfile matchmode open position 0 _path [] _originalpath []]
   .method "create [openwrite this.name close this.name] ;在当前目录创建一个文件
   .method "writepr [[chars][if this.matchmode = "open [if hair.file.open this.name [openappend this.name setwrite this.name pr :chars this.position.val writepos setwrite [] close this.name]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openappend this.name setwrite this.name pr :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._path]]]] ;在一个文件的最后开始写字符，position改变
+    if this.matchmode = "find [if hair.file.find1 this.objname [openappend this.name setwrite this.name pr :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]] ;在一个文件的最后开始写字符，position改变
   .method "writetype [[chars][if this.matchmode = "open [if hair.file.open this.name [openappend this.name setwrite this.name type :chars this.position.val writepos setwrite [] close this.name]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openappend this.name setwrite this.name type :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._path]]]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openappend this.name setwrite this.name type :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]]
   .method "overwritepr [[chars][if this.matchmode = "open [if hair.file.open this.name [openupdate this.name setwrite this.name setwritepos this.position pr :chars this.position.val writepos setwrite [] close this.name]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openupdate this.name setwrite this.name setwritepos this.position pr :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._path]]]] ;在position指定的位置写字符
+    if this.matchmode = "find [if hair.file.find1 this.objname [openupdate this.name setwrite this.name setwritepos this.position pr :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]] ;在position指定的位置写字符
   .method "overwritetype [[chars][if this.matchmode = "open [if hair.file.open this.name [openupdate this.name setwrite this.name setwritepos this.position type :chars this.position.val writepos setwrite [] close this.name]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openupdate this.name setwrite this.name setwritepos this.position type :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._path]]]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openupdate this.name setwrite this.name setwritepos this.position type :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]]
   .method "readchars [[chars][if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchars :chars this.position.val readpos setread [] close this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchars :chars this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]]] ;在position指定的位置开始读
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchars :chars this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]]] ;在position指定的位置开始读
   .method "readchar [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchar this.position.val readpos setread [] close this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchar this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchar this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
   .method "readword [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readword this.position.val readpos setread [] close this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readword this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readword this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
   .method "readlist [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
   .method "readrawline [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;在position指定的位置开始读
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
   .method "erase [if this.matchmode = "open [if hair.file.open this.name [erasefile this.name]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [erasefile this.name hair.file.find2 this._path]]] ;删除该文件
+    if this.matchmode = "find [if hair.file.find1 this.objname [erasefile this.name hair.file.find2 this._originalpath]]] ;删除该文件
   .method "rename [[newname][if this.matchmode = "open [if hair.file.open this.name [hair.base.rename this.name :newname this.name.val :newname]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.rename this.name :newname this.name.val :newname hair.file.find2 this._path]]]] ;重命名文件，并随之修改对象的name属性
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.rename this.name :newname this.name.val :newname hair.file.find2 this._originalpath]]]] ;重命名文件，并随之修改对象的name属性
   .method "copy [[newname][if this.matchmode = "open [if hair.file.open this.name [hair.base.copyfile this.name :newname]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.copyfile this.name :newname hair.file.find2 this._path]]]] ;复制文件到指定地址
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.copyfile this.name :newname hair.file.find2 this._originalpath]]]] ;复制文件到指定地址
   .method "eof? [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name hair.file.find2 this._path op :hrdlist]]] ;检测是否到头
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;检测是否到头
   .method "size [if this.matchmode = "open [if hair.file.open this.name [localmake "hrdlist hair.file.size this.name op :hrdlist]]
-    if this.matchmode = "find [if hair.file.find1 this.objname [localmake "hrdlist hair.file.size this.name hair.file.find2 this._path op :hrdlist]]] ;输出文件大小
+    if this.matchmode = "find [if hair.file.find1 this.objname [localmake "hrdlist hair.file.size this.name hair.file.find2 this._originalpath op :hrdlist]]] ;输出文件大小
   .listen "name [this._path.val [] this.position.val 0] ;修改操作的文件重置path
 end
 bury "hair.file.reg

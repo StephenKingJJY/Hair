@@ -31,7 +31,7 @@ if :mode = "batvbs [
   .writepr [createobject("wscript.shell").run "shell_temp.bat",0]
   localmake "_output shell [wscript shell_temp.vbs]
 ]]
-if :callback = "nooutput [.erase hair.object.destroy "shell_file op :_output]
+if :callback = "nooutput [if not :mode = "cmd [.erase] hair.object.destroy "shell_file op :_output]
 .name.val :callback
 ifelse :waitfile = "nooutput [
   do.until [wait 1] [member? :callback files]][

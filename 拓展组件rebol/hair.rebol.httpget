@@ -29,4 +29,4 @@ if 2=count :plist [op (word first :plist "\= first bf :plist)]
 op (word first :plist "\= first bf :plist "\& hair.rebol.httpget.repeat bf bf :plist)
 end
 
-bury "hair.rebol.httpget
+bury [hair.rebol.httpget hair.rebol.httpget.repeat]

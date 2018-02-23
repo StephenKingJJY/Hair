@@ -7,7 +7,6 @@
 7.优化文件模块速度，iconv
 8.使用hair框架制作了一个hair自身的编辑器
 9.gui input
-10.更好的hair开发者工具
 
 模块化引擎
 引擎所需的文件放在logolib下面

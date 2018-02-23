@@ -54,7 +54,8 @@ if not name? "hair_object_havedefine [make "hair_object_havedefine []] ;为了�
 if not name? "hair_object_current [make "hair_object_current "] ;当前操作的对象，帮助简化调用
 if not name? "hair_resource_piclimit [make "hair_resource_piclimit 40] ;图片资源缓存变量
 if not name? "hair_resource_picidlist [make "hair_resource_picidlist []] ;图片id与名称对应表
-if member? [微软雅黑] fontfacenames [($setfont -16 0 [微软雅黑])] ;设置字体，幼圆字体字号使中英文宽度一致
+if member? [幼圆] fontfacenames [($setfont -16 0 [幼圆])] ;设置字体，幼圆字体字号使中英文宽度一致
+if member? [微软雅黑] fontfacenames [($setfont -16 0 [微软雅黑])] ;设置字体，有微软雅黑时使用雅黑，解决winxp
 
 ;17年8月8日：还是打算使用传统的命令方式实现类的定义和对象的创建
 new "Project "Class
@@ -63,7 +64,7 @@ new "Project "Class
 	;通过保存上一个操纵的对象来实现简单调用，支持过程名也支持在表中写语句
 	.before [if not empty? hair.object.select "project [hair.debug.error _e "不能重复创建project对象 cancel] if :hair_debug [hair.base.settitle "untitle\(Hair\ on\ FMSLogo\)]]
 	;cancel用来终止对象的创建过程，before表示定义对象创建之前所需的操作.after用来描述对象销毁前的步骤
-	.after [hair.debug.error "您不能删除project对象 cancel]
+	.after [hair.debug.error "project对象已被删除]
 	.listen "width [if :hair_debug [hair.debug.error "不能在此处指定宽度 cancel]]
 	.listen "height [if :hair_debug [hair.debug.error "不能在此处指定高度 cancel]]
 	;这里只对窗口化fs模式做响应，已知bug是只能响应一次
@@ -96,14 +97,14 @@ new "Timer "Class
 	.listen "id [ifelse member? this.id :hair_timer_id [hair.debug.error "该id已被占用 cancel][queue "hair_timer_id this.id make "hair_timer_id remove this.id.h :hair_timer_id]]
 
 ;默认加载预制的gui模块、文件模块
-$use [hair.file hair.sql hair.i18n hair.rebol hair.mail hair.gui hair.xml]
+$use [hair.file hair.sql hair.i18n hair.mail hair.gui hair.xml hair.web]
 
 ;获取保存当前目录
 if not name? "hair_maindir [make "hair_maindir $whatdir]
 if :hair_debug [pr se "当前hair程序执行主目录 :hair_maindir]
 
 ;关闭预授权
-buryname "hair_preauth
+ern "hair_preauth
 
 new "hair_timer_system "Timer
 	.mode.value "noyield

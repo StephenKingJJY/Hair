@@ -12,7 +12,7 @@ make "hair_gui_keybuffer [] ;键盘按键缓存
 make "hair_gui_stillhover 1 ;鼠标hover性能
 make "hair_gui_scenebackground hair.base.turtlefree ;获取一只海龟画场景的背景
 make "hair_gui_scene " ;当前的场景
-hook "hair_exit [buryname [hair_gui_stillhover hair_gui_keybuffer _hair_gui_listenkey hair_gui_curhover _guicurhover hair_gui_curpress _guicurpress hair_gui_curclick _guicurclick hair_gui_scene hair_gui_listenkey hair_gui_listenmouse hair_gui_keylock]]
+hook "hair_exit [buryname [hair_gui_scenebackground hair_gui_stillhover hair_gui_keybuffer _hair_gui_listenkey hair_gui_curhover _guicurhover hair_gui_curpress _guicurpress hair_gui_curclick _guicurclick hair_gui_scene hair_gui_listenkey hair_gui_listenmouse hair_gui_keylock]]
 chdir :hair_res
 ifelse :hair_debug [pr "载入hair.gui资源文件中...] [windowset "FMSLogo 0 WINDOWCREATE "main "waitwindow "请稍候 300 200 120 100 []
 	STATICCREATE "waitwindow "message [正在加载资源文件...] 25 25 70 25 windowenable "waitwindow "false]
