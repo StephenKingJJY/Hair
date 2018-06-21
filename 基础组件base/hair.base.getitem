@@ -1,11 +1,12 @@
 ;取参数的前几位
-;命令版本号v1.2
+;命令版本号v1.4
 
-TO hair.base.getitem :n :v 
+TO hair.base.getitem :n :v
+if :n > (count :v) [op :v]
 op hair.base.getitem.repeat (count :v) - :n :v
 END
 TO hair.base.getitem.repeat :n :v
-if or :n<0 :n>count :v [hair.debug.error "参数错误 stop]
+if :n<0 [hair.debug.error "参数错误 stop]
 if :n=0 [op :v]
 op hair.base.getitem.repeat :n-1 bl :v
 END

@@ -31,6 +31,7 @@ catch "error [copydef word :s "tt            "hair.old.tt        ];--$tt :text  
 
 ;base类指令系列
 catch "error [copydef word :s "allfiles      "hair.base.allfiles ];--$allfiles           输出当前目录下所有文件
+catch "error [copydef word :s "arraysize     "hair.base.arraysize];--$arraysize :a       输出数组的大小
 catch "error [copydef word :s "asc           "hair.base.asc      ];--$asc :list          升序排列一个表(无重复)
 catch "error [copydef word :s "bmitem        "hair.base.bmitem   ];--$bmitem :n :v       删除表或字中指定位置的元素
 catch "error [copydef word :s "copyfile      "hair.base.copyfile ];--$copyfile :n1 :n2   复制文件
@@ -55,6 +56,7 @@ catch "error [copydef word :s "last          "hair.base.safelast ];--$last :xx  
 catch "error [copydef word :s "screenxy      "hair.base.screenxy ];--$screenxy :xy       转化坐标为屏幕坐标
 catch "error [copydef word :s "shell         "hair.base.shell    ];--$shell :l :callback 文件方式执行一段shell语句
 catch "error [copydef word :s "title         "hair.base.settitle ];--$title :text        设置主窗口标题
+catch "error [copydef word :s "token         "hair.base.token    ];--$token :l           生成随机数字字母字符串
 catch "error [copydef word :s "turtlefree    "hair.base.turtlefree ];--$turtlefree       获取一个空闲的海龟编号
 catch "error [copydef word :s "whatdir       "hair.base.whatdir  ];--$whatdir            获取当前目录
 

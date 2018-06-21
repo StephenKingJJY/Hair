@@ -178,4 +178,9 @@ new "Tag "Class
 .listen "draw []
 end
 
+;创建单行文本框类继承画布类
+new "Input "Class
+.inherit "Canvas
+
+
 bury "hair.gui.reg

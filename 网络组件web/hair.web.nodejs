@@ -1,0 +1,8 @@
+;引导用户访问安装nodejs
+;命令版本号v1.4
+
+to hair.web.nodejs
+hair.detect
+hair.web.browse "www.nodejs.org
+end
+bury "hair.web.nodejs

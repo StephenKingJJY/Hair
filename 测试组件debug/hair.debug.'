@@ -3,5 +3,6 @@
 ;命令版本号v1.2
 
 to hair.debug.' :a
+;if :hair_debug [pr :a]
 end
 bury "hair.debug.'

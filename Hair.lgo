@@ -2,11 +2,12 @@
 ;版本v1.4.0.20180125dev
 ;作者：SK (jjy@wiwy.us)
 ;@MIT License
-;@第三方程序判断hair框架是否安装--SHOW PROCEDURE? "hair
-;@判断hair框架是否正在运行--hair.detect
+;第三方程序判断hair框架是否安装--SHOW PROCEDURE? "hair
+;判断hair框架是否正在运行--hair.detect
 ;系统保留海龟40（载入图片），在你的程序开始之前向系统申请$turtlefree得到一个可用的海龟编号
 ;系统保留图片缓存区从40号开始，您可以使用原生的bitcut、bitcopy在40号之前的缓存区工作
 ;系统保留计时器1（系统环境）3（键盘）2（数据），使用新建对象的方式得到计时器，hair将会帮助你规避冲突
+;编写程序时不要轻易对hair的资源文件目录做操作
 
 to hair [:debug "true]
 ;打印文本信息并启动window模式
@@ -23,7 +24,7 @@ ifelse or :debug = 0 :debug = "false [make "hair_debug "false][make "hair_debug 
 ifelse :hair_debug [pr "debug模式已启用 hair.debug.tool SETFOCUS [FMSLogo]] [make "erract [ts ct pr "程序出现错误，请把下面的错误信息提交给您的程序发行商以获取帮助。]]
 
 ;检验记录环境变量
-if 6.35 > hair.base.getitem (count item 2 LOGOVERSION)-2 item 2 LOGOVERSION [hair.debug.error [您的fmslogo版本过低，请使用6.35及以上版本获得更好体验。] stop]
+if 7.2 > hair.base.getitem (count item 2 LOGOVERSION)-2 item 2 LOGOVERSION [hair.debug.error [hair1.4需要依赖FMSLogo7.2及以上版本运行。] stop]
 if or (not member? "FMSLogo.exe files) (not member? "hair.package files) [hair.debug.error "当前目录错误或者文件缺失 stop]
 
 ;启动简写指令

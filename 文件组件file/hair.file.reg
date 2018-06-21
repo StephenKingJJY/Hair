@@ -39,6 +39,12 @@ new "File "Class
     if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;检测是否到头
   .method "size [if this.matchmode = "open [if hair.file.open this.name [localmake "hrdlist hair.file.size this.name op :hrdlist]]
     if this.matchmode = "find [if hair.file.find1 this.objname [localmake "hrdlist hair.file.size this.name hair.file.find2 this._originalpath op :hrdlist]]] ;输出文件大小
+  .method "iconv [[fcode tcode][if this.matchmode = "open [if hair.file.open this.name [hair.file.iconv this.name :fcode :tcode]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.file.iconv this.name :fcode :tcode hair.file.find2 this._originalpath]]]] ;转换文件编码
+  .method "compress [[archive][if this.matchmode = "open [if hair.file.open this.name [hair.file.compress this.name :archive]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.file.compress this.name :archive hair.file.find2 this._originalpath]]]] ;添加文件到指定的压缩包，如果压缩包不存在则新建
+  .method "uncompress [if this.matchmode = "open [if hair.file.open this.name [hair.file.uncompress this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.file.uncompress this.name hair.file.find2 this._originalpath]]] ;解压文件到当前目录
   .listen "name [this._path.val [] this.position.val 0] ;修改操作的文件重置path
 end
 bury "hair.file.reg

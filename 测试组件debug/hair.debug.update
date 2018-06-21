@@ -8,13 +8,14 @@ localmake "dir3 "C:\\Program\ Files\ \(x86\)\\FMSLogo\\Logolib\\
 chdir :dir2
 foreach files [erasefile ?]
 chdir :dir1
-if not list? :l [make "l hair.base.allfiles foreach [changelog.txt hair_install.lgo hair.package] [make "l $bm ? :l]]
+if not list? :l [make "l hair.base.allfiles foreach [hair.debug.update changelog.txt hair_install.lgo hair.package] [make "l $bm ? :l]]
 new "updatefile "file
 .matchmode.val "find
 repeat count :l [.name.val item repcount :l .copy word :dir2 item repcount :l]
 ;先拷贝iconv到lib2
 chdir :dir2
 popdir
+chdir :hair_res
 .matchmode.val "open
 .name.val "iconv.exe
 .copy word :dir2 "iconv.exe

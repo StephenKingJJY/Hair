@@ -1,0 +1,26 @@
+;处理定时器中的web监听
+;不公开
+;命令版本号v1.4
+
+to hair.web.startup.repeat
+;超过最大缓存值时删除文件
+if :hair_maxcache<count :hair_cache [foreach :hair_cache [erasefile ?] make "hair_cache []]
+
+;监听文件变化
+make "allfile files
+repeat count :allfile [
+make "filebuffer item repcount :allfile
+if not member? :filebuffer :cache [
+repeat count :router [if hair.web.startup.repeat2 item 2 item repcount :router :filebuffer " [hair_web_fileout.name.val :filebuffer make "buffer hair_web_fileout.readword run (se last item repcount :router quoted :filebuffer quoted :buffer) hair_web_filehtml.name.val word "out_cache/ :filebuffer hair_web_filehtml.create]]
+queue "cache :filebuffer
+]
+]
+end
+
+to hair.web.startup.repeat2 :prefix :filename :_buffer
+if empty? :filename [op "false]
+if "_ = first :filename [ifelse :_buffer = :prefix [op "true][op "false]]
+op hair.web.startup.repeat2 :prefix bf :filename word :_buffer first :filename
+end
+
+bury [hair.web.startup.repeat hair.web.startup.repeat2]

@@ -1,0 +1,33 @@
+;停止web服务
+;做一些清空处理
+;命令版本号v1.4
+
+to hair.web.shutdown
+hair.detect
+
+;二次确认
+ifelse YesNoBox [关停web服务] [Choose YES to stop your website. 点击yes将会关闭您的web服务。] [] [stop]
+
+;把锁住的循环停掉
+make "hair_webkeep 0
+
+;把监听文件和out、html文件都删了
+foreach files [erasefile ?]
+chdir "html_cache
+foreach files [erasefile ?]
+chdir "out_cache
+foreach files [erasefile ?]
+make "hair_cache []
+
+;路径回退
+chdir :hair_maindir
+
+;清除不用的对象
+destroy "hair_web_fileout
+destroy "hair_web_filein
+destroy "hair_web_filehtml
+
+pr "web服务已经停止，请手动关闭nodejs服务
+
+end
+bury "hair.web.shutdown

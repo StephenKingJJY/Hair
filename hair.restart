@@ -1,8 +1,6 @@
 ;命令版本号v1.4
 
 to hair.restart
-;先退出再重新进入
-hair.exit
-hair
+run [hair.exit hair]
 end
 bury "hair.restart

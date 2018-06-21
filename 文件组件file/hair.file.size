@@ -8,10 +8,8 @@ to hair.file.size :file
 erasefile "size_temp.htxt
 ;首先拷贝文件到资源目录
 hair.base.copyfile :file (word :hair_maindir "\\ :hair_res "\\ :file)
-do.until [wait 1] [member? :file files]
 ;使用fsizecheck输出文件大小
-ignore shell (se [cmd /c] (word "\" :hair_maindir "\\ :hair_res "\\fsizecheck.exe "\") :file [> size_temp.htxt])
-do.until [wait 1] [member? "size_temp.htxt files]
+ignore (shell (se [cmd /c] (word "\" :hair_maindir "\\ :hair_res "\\fsizecheck.exe "\") :file [> size_temp.htxt]) "true)
 openread "size_temp.htxt setread "size_temp.htxt
 localmake "hrdlist readword
 setread []
