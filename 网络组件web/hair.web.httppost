@@ -1,0 +1,28 @@
+;使用wget发送post消息
+;命令版本号v1.4
+
+to hair.web.httppost :url :plist [:name "nooutput]
+hair.detect
+;保存当前目录
+localmake "restore hair.base.whatdir
+;切换到资源目录
+chdir :hair_maindir
+chdir :hair_res
+;执行下载的相关语句
+type (se "posting... :url "\ )
+pr (shell (se [cmd /c wget --post-data=] (word "\" hair.web.httpget.repeat :plist "\") [-O] :name (word "\" :url "\")) "true)
+;删除特殊的nooutput并返回之前的目录
+erasefile "nooutput
+chdir :restore
+;将资源目录中下载的文件拷贝过来
+hair.base.copyfile (word :hair_maindir "\\ :hair_res "\\ :name) :name
+do.until [wait 1] [member? :name files]
+erasefile (word :hair_maindir "\\ :hair_res "\\ :name)
+end
+to hair.web.httppost.repeat :plist
+if empty? :plist [op "]
+if 2=count :plist [op (word first :plist "= first bf :plist)]
+op (word first :plist "= first bf :plist "\& hair.web.httppost.repeat bf bf :plist)
+end
+
+bury [hair.web.httppost hair.web.httppost.repeat]

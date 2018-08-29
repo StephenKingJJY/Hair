@@ -1,0 +1,9 @@
+;该命令判断一个字符串是否为类
+;命令版本号v1.4
+
+to hair.object.classp :name
+hair.detect
+if MEMBER? :name :hair_object_class [op "true]
+op "false
+end
+bury "hair.object.classp

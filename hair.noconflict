@@ -31,6 +31,7 @@ catch "error [copydef word :s "tt            "hair.old.tt        ];--$tt :text  
 
 ;base类指令系列
 catch "error [copydef word :s "allfiles      "hair.base.allfiles ];--$allfiles           输出当前目录下所有文件
+catch "error [copydef word :s "arraysize     "hair.base.arraysize];--$arraysize :a       输出数组的大小
 catch "error [copydef word :s "asc           "hair.base.asc      ];--$asc :list          升序排列一个表(无重复)
 catch "error [copydef word :s "bmitem        "hair.base.bmitem   ];--$bmitem :n :v       删除表或字中指定位置的元素
 catch "error [copydef word :s "copyfile      "hair.base.copyfile ];--$copyfile :n1 :n2   复制文件
@@ -50,12 +51,17 @@ catch "error [copydef word :s "min           "hair.base.min      ];--$min :list 
 catch "error [copydef word :s "mousexy       "hair.base.mousexy  ];--$mousexy            输出以左上角为原点的鼠标位置
 catch "error [copydef word :s "random        "hair.base.random   ];--$random :s :e       输出起止点之间的某个实数支持小数
 catch "error [copydef word :s "rename        "hair.base.rename   ];--$rename :n1 :n2     重命名文件
+catch "error [copydef word :s "first         "hair.base.safefirst];--$first :xx          安全的取字表的第一个值
+catch "error [copydef word :s "last          "hair.base.safelast ];--$last :xx           安全的取字表的最后一个值
 catch "error [copydef word :s "screenxy      "hair.base.screenxy ];--$screenxy :xy       转化坐标为屏幕坐标
-catch "error [copydef word :s "shell         "hair.base.shell    ];--$shell :l           文件方式执行一段shell语句
+catch "error [copydef word :s "shell         "hair.base.shell    ];--$shell :l :callback 文件方式执行一段shell语句
 catch "error [copydef word :s "title         "hair.base.settitle ];--$title :text        设置主窗口标题
+catch "error [copydef word :s "token         "hair.base.token    ];--$token :l           生成随机数字字母字符串
 catch "error [copydef word :s "turtlefree    "hair.base.turtlefree ];--$turtlefree       获取一个空闲的海龟编号
+catch "error [copydef word :s "whatdir       "hair.base.whatdir  ];--$whatdir            获取当前目录
 
 ;object类指令系列
+catch "error [copydef word :s "class?        "hair.object.classp ];--$class? :name       判断字符串是否为类
 catch "error [copydef word :s "object?       "hair.object.p      ];--$object? :name      判断字符串是否为对象
 catch "error [copydef word :s "select        "hair.object.select ];--$select :class      输出所有指定类型的对象
 
@@ -83,6 +89,7 @@ catch "error [copydef word :s "hook          "hair.hook.bind     ];--$hook == ho
 catch "error [copydef word :s "destroy       "hair.object.destroy];--$destroy == destroy
 catch "error [copydef word :s "new           "hair.object.new    ];--$new == new
 catch "error [copydef word :s "objectp       "hair.object.p      ];--$objectp == $object?
+catch "error [copydef word :s "classp        "hair.object.classp ];--$classp == $class?
 
 end
 bury "hair.noconflict

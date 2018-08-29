@@ -1,0 +1,30 @@
+;启动node和express框架
+;启动对webroot目录的监听
+;通过文件变更传递参数提醒hair处理，hair返回html到express
+;涉及比较多的io操作，需要服务器使用ssd等提高效率
+;命令版本号v1.4
+
+to hair.web.startup
+hair.detect
+ifelse YesNoBox [启动web服务] [Choose YES to make sure that you have already npm install 'webroot', Choose NO to escape. 点击yes前请确保已经初始化过webroot。] [] [stop]
+
+;切换目录
+chdir "webroot
+
+;启动nodejs服务
+ignore shell [npm start]
+chdir "hair_cache
+
+;清理目录中存在的缓存文件
+foreach files [erasefile ?]
+make "hair_cache []
+
+;开始循环
+make "hair_webkeep 1
+new "hair_web_fileout "file
+new "hair_web_filehtml "file
+new "hair_web_filein "file
+pr "web服务已启动
+while [:hair_keep=1][hair.web.startup.repeat]
+end
+bury "hair.web.startup

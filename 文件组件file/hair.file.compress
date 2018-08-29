@@ -1,0 +1,13 @@
+;使用7z命令行压缩文件
+;命令版本号v1.4
+;不公开
+
+to hair.file.compress :name :archive
+;拷贝7z命令行程序到当前目录
+if not or member? "7z.exe files member? "7z_temp.exe files [hair.base.copyfile (word :hair_maindir "\\ :hair_res "\\7z.exe) "7z_temp.exe]
+;执行shell压缩文件
+ignore (shell (se [cmd /c 7z_temp.exe a] :archive :name) "true)
+;删除7z_temp
+erasefile "7z_temp.exe
+end
+bury "hair.file.compress

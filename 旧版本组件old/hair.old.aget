@@ -1,9 +1,10 @@
 ;重写pclogo时代的读取数组指令
-;命令版本号v1.2
+;命令版本号v1.4
 
 to hair.old.aget :a :v
 hair.detect
-if or (and list? :v 1=count :v) (and (not word? :a) (not array? :a)) [hair.debug.error "获取数组语法错误 stop]
+if and (not word? :a) (not array? :a) [hair.debug.error "获取数组语法错误 stop]
+if and list? :v 1=count :v [make "v first :v]
 if word? :a [make "a thing :a]
 ifelse list? :v [op mditem map [? + 1] :v :a][op item :v+1 :a]
 end
