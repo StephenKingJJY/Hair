@@ -1,12 +1,15 @@
-1.build和test、edit等debug功能加强，打包时可以选择多个模块或者命令行模式
-2.hairserver，由hair驱动的web服务
 3.优化文件模块速度，iconv
+
+2.hairserver，由hair驱动的web服务
 4.gui input
 5.新官网
-
+6.从网络更新升级hair
+7.打包到github
+8.hair.core面向对象核心
 1.3d和动画
 2.异步launch
 3.使用hair框架制作了一个hair自身的编辑器
 4.变量管理varmanager
 管理指针和全局变量
 5.雪碧图
+1.build和test、edit等debug功能加强，打包时可以选择多个模块或者命令行模式

@@ -7,12 +7,12 @@ to hair.web.startup.repeat
 if :hair_maxcache<count :hair_cache [foreach :hair_cache [erasefile ?] make "hair_cache []]
 
 ;监听文件变化
-make "allfile files
+localmake "allfile files
 repeat count :allfile [
-make "filebuffer item repcount :allfile
-if not member? :filebuffer :cache [
-repeat count :router [if hair.web.startup.repeat2 item 2 item repcount :router :filebuffer " [hair_web_fileout.name.val :filebuffer make "buffer hair_web_fileout.readword run (se last item repcount :router quoted :filebuffer quoted :buffer) hair_web_filehtml.name.val word "out_cache/ :filebuffer hair_web_filehtml.create]]
-queue "cache :filebuffer
+localmake "filebuffer item repcount :allfile
+if not member? :filebuffer :hair_cache [
+repeat count :hair_router [if hair.web.startup.repeat2 item 2 item repcount :hair_router :filebuffer " [hair_web_filein.name.val :filebuffer localmake "buffer hair_web_filein.readlist run (se last item repcount :hair_router quoted :filebuffer quoted :buffer) hair_web_fileout.name.val word "out_cache/ :filebuffer hair_web_fileout.create]]
+queue "hair_cache :filebuffer
 ]
 ]
 end
