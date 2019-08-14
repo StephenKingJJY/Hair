@@ -1,0 +1,114 @@
+;hair的模块管理工具，通过module.in和out的简单语法管理库和工程文件
+;模块引擎会试图记录所有引用的模块，并保证不重复引用以获得更快的执行速度
+;v2.0
+
+make "hair_module_handshake []
+;根据握手的key创建沟通的临时变量make "hair_module_handshake_
+make "hair_module_store []
+make "hair_module_store_what_type []
+make "hair_module_switch "
+make "hair_module_id 1
+make "hair_module_node "true
+
+;输出参数1在参数2的位置
+to hair.module.position :a :b
+repeat count :b [if :a = item repcount :b [op repcount]]
+end
+
+;输出一个特别的唯一id
+to hair.module.idgen
+if :hair_module_id = 5000 [make "hair_module_id 1]
+make "hair_module_id :hair_module_id+1
+op word timemilli hair.base.token 3 :hair_module_id 
+end
+
+;模仿switchcase语法
+to hair.module.switch :test
+make "hair_module_switch :test
+end 
+to hair.module.case :case :list
+if :hair_module_switch = :case [run :list]
+end
+
+to hair.module.in :what :path
+;如果握手变量有多个值可能会导致冲突
+;if not empty? :hair_module_handshake [if :hair_debug [pr (se "引入 :path "模块时存在多模块同时执行或者嵌套执行的情况)]]
+localmake "_id hair.module.idgen
+queue "hair_module_handshake :_id 
+;这里使用保存下来的路径判断，即不同路径引用同一个模块可能会导致重复载入
+localmake "exist 1
+ifelse not member? :path :hair_module_store [make "exist 0 catch "error [load word :path ".lgo make "exist 1] catch "error [load :path make "exist 1] if :exist = 1 [queue "hair_module_store :path queue "hair_module_store_what_type thing word "hair_module_handshake_ :_id]] [
+    make word "hair_module_handshake_ :_id item hair.module.position :path :hair_module_store :hair_module_store_what_type
+]
+;找不到lgo文件的时候，尝试去加载nodejs模块
+;通过一个指令去设定是否需要寻找node模块
+;当然用户也可以加载一个自己编写封装的模块
+;module.in "a "path == var a = require("path")
+;a " [] == a()
+;a "a [] == a.a()
+;a "a [b] == a.a("b")
+;a "a [b c] == a.a("b","c")
+;这里不存在nodejs的上下文，需要用户自己在logo中保存中间值
+;系统也不会主动检查错误，失败的返回值可能会导致程序崩溃
+ifelse and :hair_module_node :exist = 0 [
+    queue "hair_module_store :path queue "hair_module_store_what_type "node
+    make word "hair_module_handshake_ :_id [node]
+    localmake "_path (word "\(\" :path "\"\) )
+    define :what list [dot param] `[
+        openwrite "module_temp.js
+        setwrite "module_temp.js
+        pr [var hair_fs = require (\"fs\")]
+        pr [var ,:what = require ,:_path]
+        ifelse empty? :dot [
+            ifelse empty? :param [pr [var hair_var = ,@[word :what "\(\)]]][
+                pr se [var hair_var =] (word ",:what "\( hair.module.node.param :param "\) )
+            ]
+        ][
+            ifelse empty? :param [pr se [var hair_var =] (word ",:what ". :dot "\(\) )][
+                pr se [var hair_var =] (word ",:what ". :dot "\( hair.module.node.param :param "\) )
+            ]
+        ]
+        pr [hair_fs.writeFileSync("module_temp.htxt", hair_var)]
+        pr [hair_fs.writeFileSync("module_temp_end.htxt", "")]
+        setwrite []
+        close "module_temp.js
+        ignore shell [cmd /c node module_temp.js]
+        until [member? "module_temp_end.htxt files] [wait 1]
+        erf "module_temp.js
+        erf "module_temp_end.htxt
+        openread "module_temp.htxt
+        setread "module_temp.htxt
+        localmake "_out readrawline
+        setread []
+        close "module_temp.htxt
+        erf "module_temp.htxt
+        op :_out
+    ]
+][
+    if :exist = 0 [
+        hair.debug.error [module is not existed.]
+    ]
+]
+
+;处理剩下的三种情况，值、过程、类
+hair.module.switch last thing word "hair_module_handshake_ :_id
+hair.module.case "value [make :what first thing word "hair_module_handshake_ :_id]
+hair.module.case "procedure [copydef :what first thing word "hair_module_handshake_ :_id]
+hair.module.case "class [if not equal? :what first thing word "hair_module_handshake_ :_id [new :what "class .inherit first thing word "hair_module_handshake_ :_id]]
+
+;清除临时变量
+er word "hair_module_handshake_ :_id
+make "hair_module_handshake bl :hair_module_handshake
+end 
+
+to hair.module.out :what :type
+ifelse member? :type [value procedure class] [make word "hair_module_handshake_ last :hair_module_handshake list :what :type] [hair.debug.error [wrong module type]]
+end
+
+;解析node模块调用时的param表
+to hair.module.node.param :list
+if not list? :list [op (word "\" :list "\")]
+localmake "_param "
+foreach :list [make "_param (word :_param "\" ? "\", )]
+op bl :_param
+end

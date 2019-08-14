@@ -1,0 +1,59 @@
+;该命令用来根据bitindex显示载入的图片资源文件
+;命令版本号v1.2
+
+to hair.resource.drawpic :i
+localmake "restore BITINDEX
+SETBITINDEX :i
+bitpaste
+SETBITINDEX :restore
+end
+
+;该命令用来根据bitindex显示载入的图片资源文件
+;搭配mask显示透明背景,mask不能为0（为了处理piccanvas）
+;命令版本号v1.3
+
+to hair.resource.drawpicwithmask :i1 :i2
+if :i2=0 [stop]
+localmake "__restore BITINDEX
+SETBITINDEX :i1
+localmake "__bitsize bitsize
+setbitindex :hair_resource_piclimit
+bitcopy first :__bitsize last :__bitsize
+setbitindex :i2
+setbitmode 3
+bitpastetoindex :hair_resource_piclimit 0 0
+setbitindex :i1
+setbitmode 2
+bitpastetoindex :hair_resource_piclimit 0 0
+setbitindex :hair_resource_piclimit
+setbitmode 1
+bitpaste
+SETBITINDEX :__restore
+end
+
+;通过载入的文件名称获取对应的indexid
+;命令版本号v1.3
+
+to hair.resource.getpicid :n
+op last item hair.base.index :n firsts :hair_resource_picidlist :hair_resource_picidlist
+end
+
+;该命令用来载入图片资源文件
+;请注意您必须在空白背景上使用这个命令
+;并请关注图片大小
+;成功时返回保存的bitindex
+;命令版本号v1.2
+
+to hair.resource.loadpic :n
+localmake "restore BITINDEX
+hair.base.rename word :n ".hpic word :n ".bmp
+SETBITINDEX :hair_resource_piclimit
+localmake "size bitloadsize word :n ".bmp
+ask 39 [bitload word :n ".bmp]
+ask 39 [bitcut first :size last :size]
+SETBITINDEX :restore
+hair.base.rename word :n ".bmp word :n ".hpic
+queue "hair_resource_picidlist se :n :hair_resource_piclimit
+make "hair_resource_piclimit :hair_resource_piclimit + 1
+op :hair_resource_piclimit - 1
+end

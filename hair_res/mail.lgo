@@ -1,0 +1,17 @@
+;hair内置模块
+;包含发送邮件的相关操作
+;命令版本号v2.0
+
+to hair.mail
+new "hmail "Class
+.attr [host smtp.163.com port 465 secure true user cgc_2011@163.com pass whcgc2011 from cgc_2011@163.com]
+.method "send list [to subject html attach] [
+    if empty? :attach [make "attach 0]
+    localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res 
+    ignore shell (se [cmd /c node mail.js send] this.host this.port this.secure this.user this.pass this.from :to :subject :html :attach) 
+    chdir :_dir
+]
+end
+
+hair.mail
+module.out "hmail "class

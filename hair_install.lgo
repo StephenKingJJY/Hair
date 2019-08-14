@@ -1,42 +1,45 @@
-;Hair v1.4 an object-oriented framework based on FMSLogo
+;Hair v2.1 an object-oriented framework based on FMSLogo
 ;written by StephenKing (jjy@wiwy.us)
 ;Please confirm that you get the latest version from http://hair.wiwy.us
 ;
-;hair v1.4 æ˜¯ä¸€ä¸ªåŸºäºFMSLogoçš„é¢å‘å¯¹è±¡çš„æ¡†æ¶
-;ä½œè€…æ˜¯StephenKingï¼ˆjjy@wiwy.usï¼‰
-;è¯·ç¡®ä¿æ‚¨æ˜¯ä»http://hair.wiwy.usè·å–çš„æœ€æ–°ç‰ˆæœ¬ã€‚
+;hair v2.1 ÊÇÒ»¸ö»ùÓÚFMSLogoµÄÃæÏò¶ÔÏóµÄ¿ò¼Ü
+;×÷ÕßÊÇStephenKing£¨jjy@wiwy.us£©
+;ÇëÈ·±£ÄúÊÇ´Óhttp://hair.wiwy.us»ñÈ¡µÄ×îĞÂ°æ±¾¡£
 ;
 ;If your system is able to identify *.lgo file, you may just double-click this file and installation will start,
 ;or you can open FMSLogo, choose the file--open section on menu bar.
 ;
-;å¦‚æœæ‚¨çš„æ“ä½œç³»ç»Ÿå¯ä»¥æ­£ç¡®è¯†åˆ«lgoæ–‡ä»¶ï¼Œç›´æ¥ç‚¹å‡»å³å¯åœ¨fmslogoè½½å…¥å®‰è£…ã€‚
-;æˆ–è€…æ‚¨å¯ä»¥è‡ªè¡Œæ‰“å¼€fmslogoï¼Œé€šè¿‡file-openæ¥æ‰“å¼€æœ¬æ–‡ä»¶è‡ªåŠ¨å®‰è£…ã€‚
+;Èç¹ûÄúµÄ²Ù×÷ÏµÍ³¿ÉÒÔÕıÈ·Ê¶±ğlgoÎÄ¼ş£¬Ö±½Óµã»÷¼´¿ÉÔÚfmslogoÔØÈë°²×°¡£
+;»òÕßÄú¿ÉÒÔ×ÔĞĞ´ò¿ªfmslogo£¬Í¨¹ıfile-openÀ´´ò¿ª±¾ÎÄ¼ş×Ô¶¯°²×°¡£
 ;
 ;Hair is released under MIT license.
-;æ‚¨å¯ä»¥æ ¹æ®MITåè®®ä½¿ç”¨hairæ¡†æ¶
+;Äú¿ÉÒÔ¸ù¾İMITĞ­ÒéÊ¹ÓÃhair¿ò¼Ü
 
 to copyfile
 ct
-dllload "Kernel32.dll
-localmake "dir1 "release\\
-localmake "dir2 "logolib\\
-chdir :dir1
-localmake "allfiles files
+;dllload "Kernel32.dll
+;localmake "dir1 "release\\
+;localmake "dir2 "logolib\\
+;chdir :dir1
+;localmake "allfiles files
+;popdir
+;repeat count :allfiles [
+;  localmake "curfile item repcount :allfiles
+;  if [1] = dllcall (list "L "MoveFileA "S (word :dir2 :curfile) "S (word :dir1 :curfile)) [(pr "ÒÆ¶¯ÎÄ¼ş :curfile "³É¹¦)]
+;]
+;dllfree
+;rmdir "release
+chdir "hair_res
+ignore (shell [cmd /c npm install] "true)
 popdir
-repeat count :allfiles [
-  localmake "curfile item repcount :allfiles
-  if [1] = dllcall (list "L "MoveFileA "S (word :dir2 :curfile) "S (word :dir1 :curfile)) [(pr "ç§»åŠ¨æ–‡ä»¶ :curfile "æˆåŠŸ)]
-]
-dllfree
-rmdir "release
-pr "å®‰è£…å®Œæˆ
-pr "è¯·è®¿é—®å®˜æ–¹æ–‡æ¡£è·å–hairæ¡†æ¶ä½¿ç”¨å¸®åŠ©
+pr "°²×°Íê³É
+pr "Çë·ÃÎÊ¹Ù·½ÎÄµµ»ñÈ¡hair¿ò¼ÜÊ¹ÓÃ°ïÖú
 erasefile "hair_install.lgo
 windowfileedit "changelog.txt []
 end
 
 to zzz
-ifelse YesNoBox [Install Hair å®‰è£…ç¨‹åº] [Choose YES to run installation now, Choose NO to escape. ç‚¹å‡»yesç«‹å³å¼€å§‹å®‰è£…ï¼Œç‚¹å‡»noå°†ä¼šé€€å‡ºã€‚] [copyfile] [exit]
+ifelse YesNoBox [Install Hair °²×°³ÌĞò] [PLease Confirm You Have Aleady Installed NodeJS, Choose NO to escape. ÇëÔÚ°²×°HairÇ°È·±£ÒÑ¾­°²×°ÁËNodeJS£¬µã»÷no½«»áÍË³ö¡£] [copyfile] [exit]
 end
 
 Make "startup [zzz]

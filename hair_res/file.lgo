@@ -1,0 +1,195 @@
+;实现对文件读写操作封装
+;依赖node相关模块系统会在主目录下自动加载
+;命令版本号V2.0
+;如果find模式不能正确匹配到文件，通常这是由于不同目录下存在相同的文件名，可以通过修改_path来指定目录
+;增加输出文件大小，iconv，find路径优化，7z压缩
+
+make "_dir_restore hair.base.whatdir
+chdir :hair_maindir
+chdir :hair_res
+module.in "_filesize_temp "./file.js 
+chdir :_dir_restore
+
+to hair.file
+hook "hair_exit [closeall]
+new "File "Class
+  .attr [name nosuchfile matchmode open position 0 _path [] _originalpath []]
+  .method "create [openwrite this.name close this.name] ;在当前目录创建一个文件
+  .method "writepr [[chars][if this.matchmode = "open [if hair.file.open this.name [openappend this.name setwrite this.name pr :chars this.position.val writepos setwrite [] close this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openappend this.name setwrite this.name pr :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]] ;在一个文件的最后开始写字符，position改变
+  .method "writetype [[chars][if this.matchmode = "open [if hair.file.open this.name [openappend this.name setwrite this.name type :chars this.position.val writepos setwrite [] close this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openappend this.name setwrite this.name type :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]]
+  .method "overwritepr [[chars][if this.matchmode = "open [if hair.file.open this.name [openupdate this.name setwrite this.name setwritepos this.position pr :chars this.position.val writepos setwrite [] close this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openupdate this.name setwrite this.name setwritepos this.position pr :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]] ;在position指定的位置写字符
+  .method "overwritetype [[chars][if this.matchmode = "open [if hair.file.open this.name [openupdate this.name setwrite this.name setwritepos this.position type :chars this.position.val writepos setwrite [] close this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openupdate this.name setwrite this.name setwritepos this.position type :chars this.position.val writepos setwrite [] close this.name hair.file.find2 this._originalpath]]]]
+  .method "readchars [[chars][if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchars :chars this.position.val readpos setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchars :chars this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]]] ;在position指定的位置开始读
+  .method "readchar [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchar this.position.val readpos setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readchar this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
+  .method "readword [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readword this.position.val readpos setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readword this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
+  .method "readlist [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readlist this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
+  .method "readrawline [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist readrawline this.position.val readpos setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;在position指定的位置开始读
+  .method "erase [if this.matchmode = "open [if hair.file.open this.name [erasefile this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [erasefile this.name hair.file.find2 this._originalpath]]] ;删除该文件
+  .method "rename [[newname][if this.matchmode = "open [if hair.file.open this.name [hair.base.rename this.name :newname this.name.val :newname]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.rename this.name :newname this.name.val :newname hair.file.find2 this._originalpath]]]] ;重命名文件，并随之修改对象的name属性
+  .method "copy [[newname][if this.matchmode = "open [if hair.file.open this.name [hair.base.copyfile this.name :newname]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.base.copyfile this.name :newname hair.file.find2 this._originalpath]]]] ;复制文件到指定地址
+  .method "eof? [if this.matchmode = "open [if hair.file.open this.name [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [openread this.name setread this.name setreadpos this.position localmake "hrdlist eof? setread [] close this.name hair.file.find2 this._originalpath op :hrdlist]]] ;检测是否到头
+  .method "size [if this.matchmode = "open [if hair.file.open this.name [localmake "hrdlist hair.file.size this.name op :hrdlist]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [localmake "hrdlist hair.file.size this.name hair.file.find2 this._originalpath op :hrdlist]]] ;输出文件大小
+  .method "iconv [[fcode tcode][if this.matchmode = "open [if hair.file.open this.name [hair.file.iconv this.name :fcode :tcode]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.file.iconv this.name :fcode :tcode hair.file.find2 this._originalpath]]]] ;转换文件编码
+  .method "compress [[archive][if this.matchmode = "open [if hair.file.open this.name [hair.file.compress this.name :archive]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.file.compress this.name :archive hair.file.find2 this._originalpath]]]] ;添加文件到指定的压缩包，如果压缩包不存在则新建
+  .method "uncompress [if this.matchmode = "open [if hair.file.open this.name [hair.file.uncompress this.name]]
+    if this.matchmode = "find [if hair.file.find1 this.objname [hair.file.uncompress this.name hair.file.find2 this._originalpath]]] ;解压文件到当前目录
+  .listen "name [this._path.val [] this.position.val 0] ;修改操作的文件重置path
+end
+
+;不公开
+;用于find模式查找文件并跳转目录
+;查找不到就直接切换回主目录
+;命令版本v1.4
+;使用新的bat方法快速找到文件路径，并且避免文件夹的空格问题
+;_path现在是一个rawline存储可以被chdir的路径
+;另有一个新的originalpath属性用来存储当前程序执行路径
+
+to hair.file.find1 :fileobj
+;拿到之前存储的文件路径值
+localmake "_filepath run word :fileobj "._path
+localmake "_fileoriginalpath run word :fileobj "._originalpath
+localmake "_filename run word :fileobj ".name
+;判断是否存在，存在还需要判断返回路径是否存在，还存在则直接切换到该目录，否则还是需要重新取路径
+;if not empty? :_filepath [foreach :_filepath [chdir ?] op "true]
+if and not empty? :_filepath not empty? :_fileoriginalpath [chdir :_filepath op "true]
+;直接开始使用bat来找文件和当前目录
+ignore (shell [cmd /c echo %cd% > filefind_temp.htxt] "true)
+ignore (shell (se [cmd /c dir /s/b] :_filename [>> filefind_temp.htxt]) "true)
+openread "filefind_temp.htxt
+setread "filefind_temp.htxt
+make (word "hair_object_ :fileobj "__originalpath) readrawline
+if eof? [make (word "hair_object_ :fileobj "__path) [] hair.debug.error (se "find模式找不到 :_filename "文件) setread [] close "filefind_temp.htxt erasefile "filefind_temp.htxt op "false]
+;if not member? run word :fileobj ".name hair.base.allfiles [make (word "hair_object_ :fileobj "__path) [] hair.debug.error (se "find模式找不到 (run word :fileobj ".name) "文件) op "false]
+make "_filepath readrawline
+make "_filepath hair.base.getitem (count :_filepath)-(count :_filename) :_filepath
+make (word "hair_object_ :fileobj "__path) :_filepath
+setread [] close "filefind_temp.htxt
+erasefile "filefind_temp.htxt
+chdir :_filepath
+op "true
+end
+
+;不公开
+;版本号v1.4
+;用于搜寻find目录之后回退到原本的目录
+
+to hair.file.find2 :path
+if empty? :path [stop]
+chdir :path
+end
+
+
+;命令版本号v1.2
+;file组件中用来做open模式判断，并给出提示消息
+
+to hair.file.open :name
+if not member? :name files [hair.debug.error (se "当前目录下没有 :name "请尝试使用find匹配模式) op "false]
+op "true
+end
+
+;获取当前目录下某个文件的大小，不公开
+;使用node提供的方法
+;将文件拷贝到res目录下
+;命令版本号v2.0
+
+to hair.file.size :file
+;首先拷贝文件到资源目录
+hair.base.copyfile :file (word :hair_maindir "\\ :hair_res "\\ :file)
+make "_dir_restore hair.base.whatdir
+chdir :hair_maindir
+chdir :hair_res
+localmake "__size _filesize_temp "size :file
+chdir :_dir_restore
+;删除拷贝过来的文件
+erasefile (word :hair_maindir "\\ :hair_res "\\ :file)
+op :__size
+end
+
+;单独的过程用来转换文件编码格式
+;使用nodejs
+;命令版本号v2.0
+;不公开
+
+to hair.file.iconv :name :fcode :tcode
+;首先拷贝文件到资源目录
+hair.base.copyfile :name (word :hair_maindir "\\ :hair_res "\\ :name)
+;使用iconv转换文件编码
+make "_dir_restore hair.base.whatdir
+chdir :hair_maindir
+chdir :hair_res
+ignore _filesize_temp "iconv (se :name :fcode :tcode)
+chdir :_dir_restore
+;删除原本的文件
+erasefile :name
+;将转化后的文件拷贝回来
+hair.base.copyfile (word :hair_maindir "\\ :hair_res "\\ :name) :name
+;删除资源文件夹中的文件
+chdir :hair_maindir
+chdir :hair_res
+erasefile :name
+chdir :_dir_restore
+end
+
+;使用nodejs压缩文件
+;命令版本号v2.0
+;有个问题是不再能向压缩包中添加新的文件
+;不公开
+
+to hair.file.compress :name :archive
+;首先拷贝文件到资源目录
+hair.base.copyfile :name (word :hair_maindir "\\ :hair_res "\\ :name)
+;使用compressing压缩文件
+make "_dir_restore hair.base.whatdir
+chdir :hair_maindir
+chdir :hair_res
+pr _filesize_temp "zip se :name :archive
+chdir :_dir_restore
+;将压缩包拷贝回来
+hair.base.copyfile (word :hair_maindir "\\ :hair_res "\\ :archive) :archive
+;删除资源文件夹中的文件
+chdir :hair_maindir
+chdir :hair_res
+erasefile :archive
+erasefile :name
+chdir :_dir_restore
+end
+
+;解压文件到当前目录
+;命令版本号v2.0
+;不公开
+
+to hair.file.uncompress :archive
+;创建一个nodejs文件来执行
+openwrite "_com_temp
+setwrite "_com_temp
+pr se [var a=require] (word "\(\" hair.file.path :hair_maindir "\\\\ :hair_res "\\\\file.js "\"\)  )
+pr (word "a.unzip\(\" :archive "\",__dirname\) )
+setwrite []
+close "_com_temp
+ignore (shell [node _com_temp] "true)
+erasefile "_com_temp
+end
+
+to hair.file.path :path
+if empty? :path [op "]
+ifelse "\\ = first :path [op word "\\\\ hair.file.path bf :path] [op word first :path hair.file.path bf :path]
+end
+
+hair.file
+module.out "File "class

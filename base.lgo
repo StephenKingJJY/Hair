@@ -1,0 +1,449 @@
+;基础功能模块
+;包含2.0之前的base和old功能
+
+
+
+;命令版本v1.2
+;查看当前目录下所有的文件
+;包括子目录，查找完之后调回
+
+make "_allfiles_list []
+
+to hair.base.allfiles
+make "_allfiles_list []
+hair.base.allfiles.repeat
+op :_allfiles_list
+end
+
+to hair.base.allfiles.repeat
+make "_allfiles_list se files :_allfiles_list
+if 2=count directories [stop]
+repeat (count directories)-2 [chdir item repcount+2 directories hair.base.allfiles.repeat popdir]
+end
+
+;提供简单的复制文件的功能
+;命令版本号v1.2
+
+to hair.base.copyfile :n1 :n2
+dllload "Kernel32.dll
+ignore dllcall (list "L "CopyFileA "S :n2 "S :n1)
+dllfree
+end
+
+;该命令用来重命名文件
+;命令版本号v1.2
+
+to hair.base.rename :n1 :n2
+dllload "Kernel32.dll
+ignore dllcall (list "L "MoveFileA "S :n2 "S :n1)
+dllfree
+end
+
+;通过bat变量找到当前hair运行的主目录
+;whatdir命令名称来自于rebol
+;GetWorkingDirectory来自David Costanzo在社区中的留言
+;命令版本号v1.4
+
+To hair.base.whatdir
+    Local [workingDirectorySize lastError workingDirectory]
+
+    DllLoad "kernel32.dll
+
+    ; Call it with a NULL buffer to determine the required buffer size
+    Make "workingDirectorySize Item 1 (DllCall [L GetCurrentDirectoryA L 0 L 0] "kernel32.dll)
+    IfElse :workingDirectorySize = 0 [
+        Make "lastError (DllCall [L GetLastError] "kernel32.dll)
+    ][
+        Make "workingDirectory Item 2 (DllCall (List "L "GetCurrentDirectoryA "B :workingDirectorySize "L :workingDirectorySize) "kernel32.dll)
+    ]
+
+    (DllFree "kernel32.dll)
+
+    If Name? "lastError [ 
+       (Throw "Error (Word "|Could get the working directory (error=| Item 1 :lastError "|)|))
+    ]
+
+    ; Remove the NUL characters from the buffer
+    Output Filter [NotEqual? Char 0 ? ] :workingDirectory
+End
+
+
+
+;输出数组的大小
+;标准同$array的参数
+;命令版本号v1.4
+;已知问题包括查看大小之后会改变数组（danger）
+
+to hair.base.arraysize :a
+if not array? :a [hair.debug.error [param is not an array.] stop]
+;首先确定有多少个维度，在这里算法是渐进的取每个维度的第一项，直到出错
+local "nothing
+localmake "a_s 0
+localmake "a2 :a
+localmake "wakaka 0
+while [:wakaka=0] [hair.base.makep "a_s catch "error [hair.old.aset :a2 hair.base.arraysize.repeat :a_s [] make "wakaka 1] ifelse :wakaka = 0 [make "wakaka 1] [make "wakaka 0]]
+hair.base.makem "a_s
+;得到维度的个数，递归确认每个维度的大小
+local "i
+localmake "a_s2 hair.base.arraysize.repeat :a_s
+for [i 1 :a_s][
+  catch "error [forever [make "nothing hair.old.aget :a :a_s2 make "a_s2 (se hair.base.getitem :i-1 :a_s2 (item :i :a_s2)+1 hair.base.delitem :i :a_s2)]]
+  make "a_s2 (se hair.base.getitem :i-1 :a_s2 (item :i :a_s2)-1 hair.base.delitem :i :a_s2)
+]
+op map [? + 1] :a_s2
+end
+
+to hair.base.arraysize.repeat :x
+;生成指定个数的[0 0 0 0]表
+localmake "list0 []
+repeat :x [queue "list0 0]
+op :list0
+end
+
+
+;正序排列表
+;命令版本号v1.2
+
+to hair.base.asc :list
+op sort :list
+end
+
+;倒序排列表
+;命令版本号v1.2
+
+to hair.base.desc :list
+op (sort :list "greaterp)
+end
+bury "hair.base.desc
+
+
+;利用del和getitem实现删除指定位置元素的功能
+;命令版本号1.2
+
+to hair.base.bmitem :n :v
+;判断删除的元素超出范围
+if (count :v) < :n [hair.base.error [over the length.] stop]
+if (count :v) = :n [op bl :v]
+if :n=1 [op bf :v]
+;保留指定位置之前的数据
+localmake "temp1 hair.base.getitem :n-1 :v
+;保留指定位置之后的数据
+localmake "temp2 hair.base.delitem :n :v
+;合并前后数据
+op hair.base.merge :temp1 :temp2
+end
+
+
+;去掉参数的前几位
+;命令版本号v1.4
+
+to hair.base.delitem :n :v
+if :n<0 [hair.debug.error [param wrong] stop]
+if :n > count :v [ifelse list? :v [op []] [op "]]
+if :n=0 [op :v]
+op hair.base.delitem :n-1 bf :v
+end
+
+;取参数的前几位
+;命令版本号v1.4
+
+to hair.base.getitem :n :v
+if :n > (count :v) [op :v]
+op hair.base.getitem.repeat (count :v) - :n :v
+end
+to hair.base.getitem.repeat :n :v
+if :n<0 [hair.debug.error [param wrong] stop]
+if :n=0 [op :v]
+op hair.base.getitem.repeat :n-1 bl :v
+end
+
+
+;实现16进制转rgb的功能
+;命令版本号v1.3
+
+to hair.base.hex2rgb :hex
+if "# = first :hex [make "hex bf :hex]
+localmake "myrgb []
+repeat 3 [queue "myrgb hair.base.hex2rgb.repeat hair.base.getitem 2 :hex make "hex bf bf :hex]
+op :myrgb
+end
+to hair.base.hex2rgb.repeat :hex
+localmake "hexfirst first :hex
+localmake "hexlast last :hex
+ifelse and (ascii :hexfirst)<103 (ascii :hexfirst)>96 [make "hexfirst (ascii :hexfirst)-87][
+if and (ascii :hexfirst)<71 (ascii :hexfirst)>64 [make "hexfirst (ascii :hexfirst)-55]]
+ifelse and (ascii :hexlast)<103 (ascii :hexlast)>96 [make "hexlast (ascii :hexlast)-87][
+if and (ascii :hexlast)<71 (ascii :hexlast)>64 [make "hexlast (ascii :hexlast)-55]]
+op :hexfirst*16+:hexlast
+end
+
+;查找元素在表中的位置
+;版本v2.0
+to hair.base.index :v :list
+op hair.module.position :v :list
+end
+
+;输入左上角为原点坐标系的坐标值
+;输出logo原生坐标值
+;命令版本号v1.3
+
+to hair.base.logoxy :xy
+localmake "logoxy hair.object.select "Project
+if empty? :logoxy [hair.debug.error [Project has not been defined.] stop]
+;se (run word first :logoxy ".width)/2+(-first :xy) (run word first :logoxy ".height)/2+(-last :xy)
+op se (first :xy)-(run word first :logoxy ".width)/2 (run word first :logoxy ".height)/2-last :xy
+end
+
+;输入logo坐标系的坐标值
+;输出左上角为原点坐标系的坐标值
+;命令版本号v1.3
+
+to hair.base.screenxy :xy
+localmake "logoxy hair.object.select "Project
+if empty? :logoxy [hair.debug.error [Project has not been defined.] stop]
+op se (run word first :logoxy ".width)/2+first :xy (run word first :logoxy ".height)/2-last :xy
+end
+
+;该命令相当于make "v :v-1
+;命令版本号v1.4
+
+.macro hair.base.makem :v
+op (se "make quoted :v [-1+] "thing quoted :v)
+end
+
+
+;该命令相当于make "v :v+1
+;命令版本号v1.4
+
+.macro hair.base.makep :v
+op (se "make quoted :v [1+] "thing quoted :v)
+end
+
+;取出数字表中的最大项
+;命令版本号v1.4
+
+to hair.base.max :list
+op last sort :list
+end
+
+;取出数字表中的最小项
+;命令版本号v1.4
+
+to hair.base.min :list
+op first sort :list
+end
+
+;合并元素
+;字+字=字，表+表=表，字+表=[字 表]
+;数字作为字来判断
+;代码版本v1.2
+
+to hair.base.merge :v1 :v2
+if and word? :v1 word? :v2 [op word :v1 :v2]
+if and list? :v1 list? :v2 [op se :v1 :v2]
+op list :v1 :v2
+end
+
+;处理随机函数的小数问题
+;给内置的随机函数增加小数位数和起止点的参数
+;包括起点不包括终点
+;命令版本号v1.4
+
+to hair.base.random :s :e
+localmake "sew hair.base.max se hair.base.random.repeat :s hair.base.random.repeat :e
+if :sew = 0 [op :s + random (:e - :s)]
+op :s + (random round :e*:sew-:s*:sew)/:sew
+end
+
+to hair.base.random.repeat :n
+;判断小数位数
+if empty? :n [op 0]
+if ". = first :n [op power 10 count bf :n]
+op hair.base.random.repeat bf :n
+end
+
+;随机生成一个指定位数的数字字母混合字符串
+;不区分大小写
+;命令版本号v1.4
+
+to hair.base.token :l
+;用timemilli初始化随机数列
+(rerandom timemilli)
+;生成指定位数的表，由0-35之间的数字组成
+localmake "tokenlist []
+localmake "tokenlist2 "
+repeat :l [queue "tokenlist random 36]
+;将随机数转化成数字和字母
+foreach :tokenlist [
+  ifelse ? > 9 [make "tokenlist2 word :tokenlist2 char 97+?-10][make "tokenlist2 word :tokenlist2 ?]
+]
+op :tokenlist2
+end
+
+
+
+;对空字表取首会报错，而不是像pclogo那样返回一个空值
+;涉及到编码习惯不好处理
+;使用$first代替first
+;命令版本号v1.4
+
+to hair.base.safefirst :x
+if empty? :x [
+  ifelse word? :x [op "] [op []]
+]
+op first :x
+end
+
+;对空字表取尾会报错，而不是像pclogo那样返回一个空值
+;涉及到编码习惯不好处理
+;使用$last代替last
+;命令版本号v1.4
+
+to hair.base.safelast :x
+if empty? :x [
+  ifelse word? :x [op "] [op []]
+]
+op last :x
+end
+
+
+;设置主窗口的标题
+;命令版本号v1.2
+
+to hair.base.settitle :title
+  dllload "user32.dll
+  localmake "result dllcall (list "L "SetWindowTextA "S :title "L :hair_hwnd)
+  dllfree 
+end
+
+;增加回调功能
+;命令版本v1.4
+;提供四种模式cmd（最快速），bat（兼容），vbs（静默），bat+vbs（兼容+静默，最慢）
+;如果l为字，则视为一个文件名，如果为表，则视为一个表
+
+to hair.base.shell :l [:callback "nooutput] [:mode "cmd] [:waitfile "nooutput]
+ifelse word? :l [
+  localmake "_output shell :l
+][
+if :mode = "cmd [localmake "_output shell se [cmd /c] :l]
+if :mode = "bat [
+  openwrite "shell_temp.bat
+  setwrite "shell_temp.bat
+  pr :l
+  localmake "_output shell [shell_temp.bat]
+  setwrite []
+  close "shell_temp.bat
+]
+if :mode = "vbs [
+  openwrite "shell_temp.vbs
+  setwrite "shell_temp.vbs
+  pr (se [createobject("wscript.shell").run "cmd /c] :l [",0])
+  localmake "_output shell [wscript shell_temp.vbs]
+  setwrite []
+  close "shell_temp.vbs
+]
+if :mode = "batvbs [
+  openwrite "shell_temp.bat
+  setwrite "shell_temp.bat
+  pr :l
+  close "shell_temp.bat
+  openwrite "shell_temp.vbs
+  setwrite "shell_temp.vbs
+  pr [createobject("wscript.shell").run "shell_temp.bat",0]
+  localmake "_output shell [wscript shell_temp.vbs]
+  setwrite []
+  close "shell_temp.vbs
+]]
+if :callback = "nooutput [if not :mode = "cmd [erf "shell_temp.vbs erf "shell_temp.bat] op :_output]
+ifelse :waitfile = "nooutput [
+  do.until [wait 1] [member? :callback files]][
+  do.until [wait 1] [member? :waitfile files]
+]
+openread :callback
+setread :callback
+make "_output .readrawline
+setread []
+close :callback
+erf :callback erf "shell_temp.vbs erf "shell_temp.bat
+op :_output
+end
+
+
+;获取一个空闲的海龟编号
+;命令版本号v1.2
+
+to hair.base.turtlefree
+local "i
+for [i 41 1000] [if not member? :i :hair_turtle [make "hair_turtle se :hair_turtle :i op :i]]
+hair.debug.error [turtles over limit.]
+end
+
+;重写pclogo时代的读取数组指令
+;命令版本号v1.4
+
+to hair.old.aget :a :v
+if and (not word? :a) (not array? :a) [hair.debug.error "获取数组语法错误 stop]
+if and list? :v 1=count :v [make "v first :v]
+if word? :a [make "a thing :a]
+ifelse list? :v [op mditem map [? + 1] :v :a][op item :v+1 :a]
+end
+
+;重写pclogo时代的创建数组指令
+;命令版本号v1.2
+
+to hair.old.array :v
+if number? :v [op array :v stop]
+if and list? :v 1<count :v [op mdarray :v stop]
+hair.debug.error "数组定义语法不正确
+end
+
+;重写pclogo时代的设置数组指令
+;命令版本号v1.4
+
+to hair.old.aset :a :v :c
+if and (not word? :a) (not array? :a) [hair.debug.error "设置数组语法错误 stop]
+if and list? :v 1=count :v [make "v first :v]
+if word? :a [make "a thing :a]
+ifelse list? :v [mdsetitem map [? + 1] :v :a :c][setitem :v+1 :a :c]
+end
+
+;pclogo时代设置字体和字号的指令
+;命令版本号v1.3
+;colour  (optional font colour, default current SETPENCOLOR)
+;effects (optional word including any of "B, "U or "I, for
+;         bold, underlined or italic)
+
+to hair.old.setfont :height :width [:font []] [:colour []] [:effects []]
+  if emptyp :font [ make "font [Courier] ]
+	if not emptyp :colour [setpencolor :colour]
+	ifelse memberp "B :effects [ localmake "bold 900 ] [ localmake "bold 0 ]
+	ifelse memberp "I :effects [ localmake "italic 1 ] [ localmake "italic 0 ]
+	ifelse memberp "U :effects [ localmake "underline 1 ] [ localmake "underline 0 ]
+	setlabelfont (list :font :height :width 0 :bold :italic :underline)
+end
+
+;pclogo时代tt在屏幕上输出文字命令
+;命令版本号v1.2
+
+to hair.old.tt :text
+rt 90 label :text lt 90
+end
+
+;file里面的命令
+;用来查看当前目录下所有的指定扩展名的文件
+;命令版本v1.2
+
+to hair.file.extension :e
+hair.detect
+op hair.file.extension.repeat files [] :e
+end
+to hair.file.extension.repeat :curfile :curfile2 :e
+if empty? :curfile [op :curfile2]
+localmake "exfile first :curfile
+if (count :exfile)>(count :e)+1 [
+  if :e = hair.base.delitem (count :exfile)-(count :e) :exfile [
+    make "curfile2 se :curfile2 :exfile
+  ]
+]
+op hair.file.extension.repeat bf :curfile :curfile2 :e
+end

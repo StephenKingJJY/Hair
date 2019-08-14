@@ -1,0 +1,159 @@
+;hair官方模块htable
+;实现关系数据库基本功能及sql相关指令
+;命令版本号v2.0
+
+make "hair_table_sync [] ;保存每次操作后留下的内存与文件之间差异的待同步部分
+make "hair_table_sync_lock "false ;当一个同步操作执行时锁定，false表示不锁定
+
+to hair.table
+hook "hair_timer_data [hair.table.sync]
+new "Htable "Class
+    .attr [filename demo.htab autosync false field [] data [] _data []] ;这里的filename以资源文件目录为基准,_data存储了尚未同步的数据
+    .listen "filename [if not empty? this._data [hair.debug.error [There is data unsaved.] cancel] this.autosync.val "false this.data.val [] this.field.val []] ;filename重置的时候恢复默认值
+    .method "load [localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res if not member? this.filename files [hair.debug.error [You should create datafile first.] stop]
+        openread this.filename
+        setread this.filename
+        this.field.val readlist
+        this.data.val hair.old.array se 1 (count this.field)/2
+        until [eof?][this.data.val listtoarray se arraytolist this.data (list listtoarray readlist)]     
+        chdir :_dir
+        setread []
+        close this.filename
+        if :hair_debug [pr (se [load] this.objname [datafile done.])]
+    ] ;载入数据库文件，没有找到数据文件时提示创建新的文件
+    .method "create list [field] [localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res
+        openwrite this.filename
+        setwrite this.filename 
+        pr :field
+        setwrite []
+        close this.filename
+        chdir :_dir
+        this.field.val :field
+        this.data.val hair.old.array se 1 (count this.field)/2
+        if :hair_debug [pr (se [create] this.objname [datafile done.])]
+    ]
+    .method "sync [
+        while [:hair_table_sync_lock] [wait 1]
+        make "hair_table_sync_lock "true
+        foreach this._data [queue "hair_table_sync ?]
+        make "hair_table_sync_lock "false
+    ]
+    .method "insert list [field] [
+        ;不要求包含每一个值，自动生成默认值
+        ;对默认参数做解释，除了默认值之外，目前支持自增描述autoincrease
+        ;初始化字段及默认值
+        localmake "new_sqlfield []
+        repeat (count this.field)/2 [
+            localmake "cur_sqlfield item repcount*2-1 this.field
+            ifelse member? :cur_sqlfield hair.object.even :field [
+            ;某字段得到了键入值
+            ;queue "new_sqlfield :cur_sqlfield
+            queue "new_sqlfield replaceattr3 :cur_sqlfield :field
+            ][
+                ;需要默认值，且默认值大于12，则判断是否是自增字段
+                ifelse (count item repcount*2 this.field)>12 [
+                ifelse "autoincrease = hair.base.getitem 12 item repcount*2 this.field [
+                ;遇到自增字段，忽略设置的值
+                ;queue "new_sqlfield :cur_sqlfield
+                queue "new_sqlfield hair.base.delitem 12 item repcount*2 this.field
+                this.field.val (se hair.base.getitem (hair.base.index :cur_sqlfield this.field) this.field
+                (word "autoincrease 1+hair.base.delitem 12 item repcount*2 this.field)
+                hair.base.delitem (hair.base.index :cur_sqlfield this.field )+1 this.field
+                )][queue "new_sqlfield item repcount*2 this.field]][
+                ;某字段需要默认值
+                ;queue "new_sqlfield :cur_sqlfield
+                queue "new_sqlfield item repcount*2 this.field]
+        ]]
+        this.data.val listtoarray se arraytolist this.data (list listtoarray :new_sqlfield)
+        ifelse this.autosync [
+            make "hair_table_sync lput `[openappend this.filename setwrite this.filename pr ,:new_sqlfield setwrite [] close this.filename openupdate this.filename setwrite this.filename setwritepos 0 pr this.field setwrite [] close this.filename] :hair_table_sync
+        ][
+            this._data.val se this._data `[[openappend this.filename setwrite this.filename pr ,:new_sqlfield setwrite [] close this.filename openupdate this.filename setwrite this.filename setwritepos 0 pr this.field setwrite [] close this.filename]]
+        ]
+    ]
+    ;htab.update [:f1=1] [make "f1 2]
+    .method "update list [e a] [
+        ;拿到表对应的字段数量
+        localmake "sqlfieldnum (count this.field )/2
+        ;通过改变aget参数，找到对应的e，然后执行a操作，跟select略有区别
+        repeat (count this.data )-1 [
+            localmake "repdata repcount
+            repeat :sqlfieldnum [make (word "f repcount) hair.old.aget this.data se :repdata repcount-1]
+            if empty? :e [make "e ["true]]
+            if run :e [
+                run :a
+                ;将f1等值还原到数据中
+                localmake "__allf []
+                repeat :sqlfieldnum [hair.old.aset this.data se :repdata repcount-1 thing word "f repcount queue "__allf thing word "f repcount]
+                ;判断是否需要同步
+                ifelse this.autosync [
+                    make "hair_table_sync lput `[openupdate this.filename setread this.filename setreadpos 0 repeat ,:repdata [localmake "__temp readlist] localmake "__pos readpos make "__temp readlist localmake "__pos2 readpos setwrite this.filename setwritepos :__pos type ,:__allf if (:__pos2-1) > writepos [repeat :__pos2 - writepos - 2 [type char 32]] setread [] setwrite [] close this.filename] :hair_table_sync
+                ][
+                    this._data.val se this._data `[[openupdate this.filename setread this.filename setreadpos 0 repeat ,:repdata [localmake "__temp readlist] localmake "__pos readpos make "__temp readlist localmake "__pos2 readpos setwrite this.filename setwritepos :__pos type ,:__allf if (:__pos2-1) > writepos [repeat :__pos2 - writepos - 2 [type char 32]] setread [] setwrite [] close this.filename]]
+                ]
+            ]
+        ]
+        ;清除使用到的f1参数等
+        repeat :sqlfieldnum [ern word "f repcount]
+    ]
+    ;htab.select [:f1=2 and :f2=3]
+    .method "select list [e] [
+        localmake "data this.data
+        localmake "sqlselect []
+        localmake "sqlfieldnum count first :data
+        repeat count :data [localmake "repdata repcount repeat :sqlfieldnum [make (word "f repcount) item repcount item :repdata :data]
+        if empty? :e [make "e ["true]]
+        if run :e [make "sqlselect lput item repcount :data :sqlselect]]
+        repeat :sqlfieldnum [ern word "f repcount]
+        op listtoarray :sqlselect
+    ]
+    ;htab.delete [:f1=2 and :f2=3]
+    .method "delete list [e] [
+        localmake "data this.data
+        localmake "sqlfieldnum count first :data
+        repeat count :data [
+            localmake "repdata repcount repeat :sqlfieldnum [make (word "f repcount) item repcount item :repdata :data]
+            if empty? :e [make "e ["true]]
+            if run :e [
+                ;删除data中的某项数据
+                this.data.val listtoarray se hair.base.getitem :repdata-1 arraytolist this.data hair.base.delitem :repdata arraytolist this.data
+                ;判断是否需要同步
+                ifelse this.autosync [
+                    make "hair_table_sync lput `[openupdate this.filename setread this.filename setreadpos 0 repeat ,@[:repdata-1] [localmake "__temp readlist] localmake "__pos readpos make "__temp readlist localmake "__pos2 readpos setwrite this.filename setwritepos :__pos repeat :__pos2 - :__pos [type char 32] setread [] setwrite [] close this.filename] :hair_table_sync
+                ][
+                    this._data.val se this._data `[[openupdate this.filename setread this.filename setreadpos 0 repeat ,@[:repdata-1] [localmake "__temp readlist] localmake "__pos readpos make "__temp readlist localmake "__pos2 readpos setwrite this.filename setwritepos :__pos repeat :__pos2 - :__pos [type char 32] setread [] setwrite [] close this.filename]]
+                ]
+            ]
+        ]
+        repeat :sqlfieldnum [ern word "f repcount]
+    ]
+end
+
+;table同步组件
+;用来保证内存和文件数据间同步
+;命令版本号v2.0
+
+to hair.table.sync
+if empty? :hair_table_sync [stop]
+if :hair_table_sync_lock [stop]
+make "hair_table_sync_lock "true
+make "hair_table_sync_cur first :hair_table_sync
+make "hair_table_sync bf :hair_table_sync
+localmake "_dir hair.base.whatdir
+chdir :hair_maindir
+chdir :hair_res
+run :hair_table_sync_cur
+chdir :_dir
+if empty? :hair_table_sync [if :hair_debug [pr [Htable synchronization is completed.]]]
+make "hair_table_sync_lock "false
+end
+
+;找到对应字段的值
+to replaceattr3 :temp :list
+if :temp = first :list [op first bf :list]
+op replaceattr3 :temp bf bf :list
+end
+
+
+hair.table
+module.out "Htable "class

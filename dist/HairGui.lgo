@@ -1,0 +1,303 @@
+;与module引用的模块不同，hairgui现在是单独的程序
+;实现gui的各类组件及交互功能
+;命令版本号v2.1
+
+;负责响应鼠标移动行为，即判断哪一个画布得到hover状态
+to hair.gui.mousehover :canvaslist :canvasparam
+;pr se :canvaslist :canvasparam
+	make "hair_gui_curhover "
+	catch "findwhichhover [foreach :canvasparam [
+		make "_guicurhover ?
+		if hair.gui.inrange mousepos list first :_guicurhover first bf :_guicurhover last bl :_guicurhover last :_guicurhover [make "hair_gui_curhover item # :canvaslist throw "findwhichhover]
+	]]
+	' [如果没有任何画布被hover，则状态全部坍缩为wait]
+	' [某个画布被hover，其他画布变为wait，该画布为press时，状态不变，hover不变，不可能是click，仅当为wait的时候变成hover]
+	ifelse empty? :hair_gui_curhover [
+		if :hair_gui_stillhover = 0 [
+			foreach :canvaslist [hair.background.async se word ? ".mousestatus.val quoted "wait]
+			make "hair_gui_stillhover 1
+		]
+	] [
+		make "hair_gui_stillhover 0
+		foreach remove :hair_gui_curhover :canvaslist [hair.background.async se word ? ".mousestatus.val quoted "wait]
+		if "wait = run word :hair_gui_curhover ".mousestatus [hair.background.async se word :hair_gui_curhover ".mousestatus.val quoted "hover]
+	]
+end
+
+to hair.gui.reg
+make "hair_gui_listenkey "false ;默认不启用键盘监听
+make "hair_gui_listenmouse "true ;默认启用鼠标监听
+make "hair_gui_keylock " ;使hair框架中组件得以独享键盘信息
+make "hair_gui_keybuffer [] ;键盘按键缓存
+make "hair_gui_stillhover 1 ;鼠标hover性能
+make "hair_gui_scenebackground hair.base.turtlefree ;获取一只海龟画场景的背景
+make "hair_gui_scene " ;当前的场景
+
+;负责响应鼠标的按下行为，即判断哪个画布得到press状态
+hook "hair_gui_mousepress [
+	ifelse empty? :hair_gui_curhover [
+	make "hair_gui_curpress "
+	catch "findwhichpress [foreach run word :hair_gui_scene ".canvas [
+		make "_guicurpress ?
+		if hair.gui.inrange mousepos hair.base.logoxy se run word :_guicurpress ".xpos run word :_guicurpress ".ypos run word :_guicurpress ".width run word :_guicurpress ".height [make "hair_gui_curpress :_guicurpress throw "findwhichpress]
+	]]][make "hair_gui_curpress :hair_gui_curhover]
+	' [鼠标不在任何画布中，即表示随便乱点的，不做操作]
+	' [在某个画布中按下，画布状态不可能click，不可能是press，极小概率wait，hover改为press]
+	ifelse empty? :hair_gui_curpress [
+	] [
+		if member? run word :hair_gui_curpress ".mousestatus [wait hover] [run se word :hair_gui_curpress ".mousestatus.val quoted "press]
+	]
+]
+;负责响应鼠标的松开行为，即判断哪个画布得到click状态
+hook "hair_gui_mouseclick [
+	ifelse empty? :hair_gui_curhover [
+	make "hair_gui_curclick "
+	catch "findwhichclick [foreach run word :hair_gui_scene ".canvas [
+		make "_guicurclick ?
+		if hair.gui.inrange mousepos hair.base.logoxy se run word :_guicurclick ".xpos run word :_guicurclick ".ypos run word :_guicurclick ".width run word :_guicurclick ".height [make "hair_gui_curclick :_guicurclick throw "findwhichclick]
+	]]][make "hair_gui_curclick :hair_gui_curhover]
+	' [鼠标不在任何画布中，即表示随便乱点的，不做操作]
+	' [在某个画布中松开，画布状态必须为press，才产生一次click，然后回到hover]
+	ifelse empty? :hair_gui_curclick [
+	] [
+		if "press = run word :hair_gui_curclick ".mousestatus [run se word :hair_gui_curclick ".mousestatus.val quoted "click run se word :hair_gui_curclick ".mousestatus.val quoted "hover]
+	]
+]
+
+new "hair_timer_keyboard "Timer
+	.delay.value 10
+	.mode.value "noyield
+	.command.value [if not (or empty? :hair_gui_scene not :hair_gui_listenkey) [hair.hook.create "hair_gui_key]]
+	.start
+
+hook "hair_gui_key [
+	if hair.gui.keyp [
+		make "_curkey hair.gui.getkey
+		ifelse empty? :hair_gui_keylock [
+			make "_scenekey run word :hair_gui_scene ".key
+			until [empty? :_scenekey] [ifelse :_curkey=first :_scenekey [run hair.object.replace first bf :_scenekey first bf bf :_scenekey 1 make "_scenekey []] [make "_scenekey bf bf bf :_scenekey]] 
+		][
+			run se word :hair_gui_keylock ".keyall :_curkey
+		]
+	]
+]
+
+;创建场景类，用来统一管理画布元素
+new "Scene "Class
+.attr [canvas [] key [] background [hair.old.tt "Scene] canvas_param[] listenkey false keyallobj 0] ;此场景中容纳的元素，一个元素仅可以被一个场景调用,key[67 Button1 [wakka] 68 Button1 [] 69 Button2 []]
+.method "render [make "hair_gui_keybuffer [] make "hair_gui_listenmouse "false make "hair_gui_listenkey "false cs ask :hair_gui_scenebackground [ht pu setpos hair.base.logoxy [0 0] pd run this.background] make "hair_gui_scene this.objname
+	this.canvas_param.val []
+	foreach this.canvas [make "_sceneitem ? this.canvas_param.val se this.canvas_param bf list [] se hair.base.logoxy se run word :_sceneitem ".xpos run word :_sceneitem ".ypos se run word :_sceneitem ".width run word :_sceneitem ".height run se word :_sceneitem ".keepback.val 0 if run word :_sceneitem ".display [run word :_sceneitem "._render]]
+	make "hair_gui_listenmouse "true make "hair_gui_listenkey this.listenkey
+	if not (or empty? :hair_gui_scene not :hair_gui_listenmouse) [run se [mouseon [hair.hook.create "hair_gui_mousepress][hair.hook.create "hair_gui_mouseclick][][]] (list (list "hair.gui.mousehover this.canvas this.canvas_param))]
+	keyboardon [queue "hair_gui_keybuffer keyboardvalue]] ;切换到该场景，清空之前场景的所有数据、元素和键鼠交互检测
+.method "collision [[xy wd canvas][localmake "newcanvas remove :canvas this.canvas repeat count :newcanvas [make "_sceneitem item repcount :newcanvas
+	if run word :_sceneitem ".display [
+		if not hair.gui.collision hair.base.logoxy :xy :wd hair.base.logoxy se run word :_sceneitem ".xpos run word :_sceneitem ".ypos se run word :_sceneitem ".width run word :_sceneitem ".height [op "false]]] op "true ]] ;判断传递的参数与该场景内的其他显性元素之间是否冲突
+.method "addcanvas [[canvas][this.canvas.val se this.canvas :canvas]] ;给canvas初始化方法调用
+.method "addapply [[apply canvas command][this.key.val (se this.key :apply :canvas (list :command))]]
+.listen "keyallobj [if this.keyallobj.h = this.keyallobj [cancel] make "hair_gui_keylock this.keyallobj foreach this.canvas [run se word ? "._keyall.val quoted this.keyallobj]] ;当一个画布申请全局监听时，通知其他画布
+
+;创建画布类，画布采用左上角为原点的坐标系
+;v2.1，为了快速响应，画布现在不能在场景render之后再调整大小位置
+;动画功能可能要做另外的类来在后续版本中实现
+new "Canvas "Class
+.attr [width 100 height 100 xpos 0 ypos 0 display true scene 0 _drawp [] draw [pu setxy xcor+1 ycor-1 pd repeat 2 [rt 90 fd this.width - 2 rt 90 fd this.height - 2] SETFLOODCOLOR 4 pu setxy xcor+1 ycor-1 pd fill hair.old.tt this.mousestatus] keepback 0 turtle 0 mousestatus wait noflicker false _keyall 0]
+.before [this.turtle.val hair.base.turtlefree this._drawp.val hair.object.replace this.objname this.draw 1] ;创建画布时获取一个空闲海龟
+;.listen "width [if this.width = this.width.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "位置冲突 cancel] [( this._render se this.xpos this.ypos se this.width.h this.height )]]]
+;.listen "height [if this.height = this.height.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "位置冲突 cancel] [( this._render se this.xpos this.ypos se this.width this.height.h )]]]
+;.listen "xpos [if this.xpos = this.xpos.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "位置冲突 cancel] [( this._render se this.xpos.h this.ypos se this.width this.height )]]]
+;.listen "ypos [if this.ypos = this.ypos.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "位置冲突 cancel] [( this._render se this.xpos this.ypos.h se this.width this.height )]]]
+.listen "display [if this.display = this.display.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "位置冲突 cancel] [( this._render se this.xpos this.ypos se this.width this.height )]]]
+.listen "draw [if this.draw = this.draw.h [cancel] this._drawp.val hair.object.replace this.objname this.draw 1 if and this.scene = :hair_gui_scene this.display = "true [this._render]]
+;.method "move [[xypos][if not list? :xypos [hair.debug.error _e "移动画布需要xy坐标组成的表作为参数 stop] this.xpos.val first :xypos this.ypos.val last :xypos]]
+.method "show [if this.display = "true [stop] this.display.val "true]
+.method "hide [if this.display = "false [stop] this.display.val "false]
+.method "init [[scene][if not this.scene = 0 [hair.debug.error _e "不能重复初始化画布 stop] if not member? :scene $select "scene [hair.debug.error _e "场景不存在 stop] run se word :scene ".addcanvas quoted this.objname this.scene.val :scene]] ;初始化登记画布到某个场景中
+if :hair_debug [.listen "mousestatus [if this.mousestatus = "click [pr "clicked] if not this.mousestatus = this.mousestatus.h [( this._render se this.xpos this.ypos se this.width this.height )]]]
+.method "key [[apply command][if this.scene = 0 [hair.debug.error _e "请先初始化画布 stop] run (se (word this.scene ".addapply) :apply quoted this.objname (list :command))]] ;向场景登记画布需要检测的按键以及需要执行的语句
+.method "applykeyall [if this.scene = 0 [hair.debug.error _e "请先初始化画布 stop] run se word this.scene ".keyallobj.val quoted this.objname] ;向场景申请锁定键盘监听
+.method "freekeyall [if this.scene = 0 [hair.debug.error _e "请先初始化画布 stop] run se word this.scene ".keyallobj.val quoted "] ;向场景申请释放键盘锁定
+.method "keyall [[key][pr :key]] ;当本画布锁定键盘监听的时候遇到键盘输入事件此方法被调用
+.method "_reset [( this._render se this.xpos this.ypos se this.width this.height )]
+.method "_render [[[xy []] [wh []]][if not :hair_gui_scene = this.scene [stop]
+	ask this.turtle [ht]
+	if not this.keepback = 0 [
+		if not this.noflicker [setbitindex this.keepback ask this.turtle [pu setpos hair.base.logoxy se first :xy (last :xy) + last :wh pd localmake "restore bitindex setbitindex this.keepback bitpaste setbitindex :restore]]
+	]
+	if not this.display [ask this.turtle [pu setpos hair.base.logoxy se this.xpos this.ypos pd] stop]
+	ask this.turtle [pu setpos hair.base.logoxy se this.xpos this.ypos + this.height pd]
+	if and this.keepback = 0 not this.noflicker [this.keepback.val :hair_resource_piclimit hair.base.makep "hair_resource_piclimit localmake "restore bitindex setbitindex this.keepback ask this.turtle [bitcopy this.width this.height] setbitindex :restore]
+	if not this.noflicker [localmake "restore bitindex setbitindex this.keepback ask this.turtle [bitcopy this.width this.height] setbitindex :restore]
+	ask this.turtle [PENNORMAL setpencolor "black setpensize 1 SETHEADING 0 pu setpos hair.base.logoxy se this.xpos this.ypos pd run this._drawp ]
+]]
+;noflicker用来解决闪烁问题，即不贴原图，直接用新图覆盖的办法，场景局限在draw的前后范围必须完美相同
+
+;继承画布类的图片画布，解决透明问题
+new "PicCanvas "Class
+.inherit "Canvas
+.listen "pic [make "restore bitindex setbitindex this.pic this.width.val 2+first bitsize this.height.val 2+last bitsize setbitindex :restore]
+.attr [draw [pu setpos hair.base.logoxy se this.xpos + 1 this.ypos + this.height - 1 pd hair.resource.drawpicwithmask this.pic this.mask] pic 0 mask 0]
+.listen "width []
+.listen "height []
+
+;创建标签类继承画布类
+new "Tag "Class
+.inherit "Canvas
+.before [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length )]
+.attr [text 这是一个tag color black length 20 draw [pu setxy xcor+1 ycor-1 pd setpencolor this.color make "_tagtext this.text repeat int (count this.text ) / this.length [hair.old.tt hair.base.getitem this.length :_tagtext make "_tagtext hair.base.delitem this.length :_tagtext pu bk (last labelsize first this.text ) pd] hair.old.tt :_tagtext setpencolor "black]]
+.listen "text [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ( this._reset )]
+.listen "length [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ]
+.listen "color [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ( this._reset )]
+.listen "mousestatus [if this.mousestatus="click [this.freekeyall]]
+.listen "draw []
+
+
+;创建新画布类，采用海龟直接绘制的方式。
+new "Button "Class
+.inherit "Canvas 
+.attr [_draw 0 _mtime 0 width 90 height 40 text Button hotkey 0 click [] _click [] press [] _press [] hover [] _hover [] wait [] _wait [] noflicker true draw [
+	' [初始化按钮，先清理出空白区域]
+	if this._draw=0 [
+		pu setxy xcor + this.height/2 ycor - this.height/2 pd
+		pe setpensize this.height rt 90 fd this.width - this.height rt 90 PENNORMAL setpensize 1
+		pu setx xcor + this.height/2 pd
+		repeat 2[arc2 90 this.height/2 fd this.width - this.height arc2 90 this.height/2] lt 180
+		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd hair.old.tt this.text
+	]
+	' [从wait变为hover]
+	if this._draw=1 [
+		pu setxy xcor + this.height/2 ycor - this.height/2 pd
+		setpensize this.height rt 90 fd this.width - this.height lt 90 PENNORMAL setpensize 1
+		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd setpencolor "white hair.old.tt this.text
+	]
+	' [从press/click变为hover]
+	if this._draw=2 [
+		pu setxy xcor + this.height/2 ycor - this.height/2 pd
+		setpensize this.height rt 90 fd this.width - this.height lt 90 PENNORMAL setpensize 1
+		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd setpencolor "white hair.old.tt this.text
+	]
+	' [从hover变press]
+	if this._draw=3 [
+		pu setxy xcor + this.height/2 ycor - this.height/2 pd
+		setpencolor "grey setpensize this.height rt 90 fd this.width - this.height lt 90 PENNORMAL setpensize 1 
+		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd setpencolor "white hair.old.tt this.text
+	]
+	this._draw.val 0
+]]
+.listen "hotkey [if not this.hotkey = this.hotkey.h [this.key this.hotkey [this.mousestatus.val "click this.mousestatus.val "hover]]]
+.listen "click [this._click.val hair.object.replace this.objname this.click 1]
+.listen "hover [this._hover.val hair.object.replace this.objname this.hover 1]
+.listen "press [this._press.val hair.object.replace this.objname this.press 1]
+.listen "wait [this._wait.val hair.object.replace this.objname this.wait 1]
+.listen "mousestatus [if this.mousestatus = this.mousestatus.h [cancel] 
+	if this.mousestatus = "click [this.freekeyall run this._click]
+	if this.mousestatus = "press [this._draw.val 3 this.text.val this.text run this._press] 
+	if this.mousestatus = "hover [
+		ifelse this.mousestatus.h="wait [
+			this._draw.val 1
+			this.text.val this.text
+		][
+			this._draw.val 2
+			this.text.val this.text
+		]
+		run this._hover]
+	if this.mousestatus = "wait [this._draw.val 0 this.text.val this.text run this._wait]]
+.listen "text [( this._render se this.xpos this.ypos se this.width this.height )]
+;采用noflicker防止闪烁，不建议在场景刷新后操作按钮，即改变大小，改变位置，改变文字。
+
+;创建文本框类，开始支持键盘交互
+new "Input "Class
+.inherit "Canvas
+.attr [width 150 height 40 length 10 text Input noflicker true draw[
+	pu setxy xcor + this.height/2 ycor - this.height/2 pd
+	pe setpensize this.height rt 90 fd this.width - this.height rt 90 PENNORMAL setpensize 1
+	pu setx xcor + this.height/2 pd
+	repeat 2[arc2 90 this.height/2 fd this.width - this.height arc2 90 this.height/2] lt 180
+	pu setxy xcor - ( this.width - this.height/2 ) ycor + this.height/2 - ( this.height - last labelsize this.text )/2 pd 
+	ifelse this._keyall = this.objname [hair.old.tt word this.text "\|] [hair.old.tt this.text]
+]]
+.listen "text [if not this.text.h = this.text [this._reset]]
+.listen "mousestatus [if this.mousestatus = this.mousestatus.h [cancel] 
+	if this.mousestatus = "click [
+		this.applykeyall
+		this._reset
+	]
+]
+.listen "_keyall [if this._keyall.h = this.objname [this._reset]]
+.method "keyall [[key][ifelse not :key = 8 [ if this.length<count this.text [stop] this.text.val word this.text char :key][if not empty? this.text [this.text.val bl this.text]]]] ;当本画布锁定键盘监听的时候遇到键盘输入事件此方法被调用
+end
+
+;不对外公开
+;用来根据参数获取画布的名称
+;[a c1 b c2 a c3] ==a==> [c1 c3]
+;命令版本号v1.3
+
+to hair.gui.findnext :v :l
+if empty? :l [op []]
+ifelse :v = first :l [op se first bf :l hair.gui.findnext :v bf bf :l] [op hair.gui.findnext :v bf bf :l]
+end
+
+;获取下次按键
+;如果在上次调用getkey后已经被按了按键，则立即返回，否则就一直等待按键
+;命令版本号v1.3
+
+to hair.gui.getkey
+forever [
+		if not 0 = count :hair_gui_keybuffer [
+			localmake "key first :hair_gui_keybuffer
+			make "hair_gui_keybuffer butfirst :hair_gui_keybuffer
+			output :key ]
+		wait 1 ]
+end
+
+;判断某点是否在某一范围内
+;基于logo坐标
+;命令版本号v1.3
+
+TO hair.gui.inrange :xy1 :xy2 :width :height
+	(local "x "x2 "y "y2)
+	make "x first :xy1 make "x2 first :xy2
+	make "y last :xy1 make "y2 last :xy2
+	ifelse (AND :x >= :x2 :x <= :x2+:width :y <= :y2 :y >= :y2-:height ) [OP "TRUE] [OP "FALSE]
+END
+
+;判断两个矩形画布是否冲突，logo坐标
+;不对外公开
+;实际上是v1碰撞检测的改写，同时也支持现在的碰撞检测，但是不对外公开
+;使用的是公开的inrange方法
+;判断的方法是两个画布的八个点都不能在对方的区域内
+;命令版本号v1.3
+;true为不冲突，false为冲突
+
+to hair.gui.collision :xy1 :wh1 :xy2 :wh2
+;首先计算出四个点来
+localmake "xxyy1 []
+queue "xxyy1 :xy1 ;左上角
+queue "xxyy1 se (first :xy1) + (first :wh1) last :xy1 ;右上角
+queue "xxyy1 se first :xy1 (last :xy1) - (last :wh1) ;左下角
+queue "xxyy1 se (first :xy1) + (first :wh1) (last :xy1) - (last :wh1) ;右下角
+;判断这四个点不在对方范围内，任何一个在范围内就直接停掉
+foreach :xxyy1 [if hair.gui.inrange ? :xy2 first :wh2 last :wh2 [op "false]]
+;计算另外四个点
+localmake "xxyy2 []
+queue "xxyy2 :xy2 ;左上角
+queue "xxyy2 se (first :xy2) + (first :wh2) last :xy2 ;右上角
+queue "xxyy2 se first :xy2 (last :xy2) - (last :wh2) ;左下角
+queue "xxyy2 se (first :xy2) + (first :wh2) (last :xy2) - (last :wh2) ;右下角
+;判断这四个点不在对方范围内，任何一个在范围内就直接停掉
+foreach :xxyy2 [if hair.gui.inrange ? :xy1 first :wh1 last :wh1 [op "false]]
+;如果全部不在，则输出不冲突
+op "true
+end
+
+;判断是否有按键
+;命令版本号v1.3
+
+to hair.gui.keyp
+ifelse 0 = count :hair_gui_keybuffer [ output "FALSE ] [ output "TRUE ]
+end
+
+
+
+make "startup [hair.gui.reg pr [hairGUI is started.]]

@@ -1,0 +1,20 @@
+{
+  "name": "hair_res",
+  "version": "2.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {},
+  "author": "StephenKing",
+  "license": "MIT",
+  "devDependencies": {
+    "basic-ftp": "^3.3.1",
+    "chance": "^1.0.18",
+    "commander": "^2.19.0",
+    "compressing": "^1.4.0",
+    "encoding": "^0.1.12",
+    "nodemailer": "^5.1.1",
+    "request": "^2.88.0",
+    "unzip": "^0.1.11",
+    "xml-js": "^1.6.11"
+  }
+}

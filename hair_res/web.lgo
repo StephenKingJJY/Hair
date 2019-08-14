@@ -1,0 +1,29 @@
+;hair内置模块
+;包含客户端网络的相关操作
+;命令版本号v2.0
+
+to hair.web
+new "hweb "Class
+;使用cmd-start实现打开默认浏览器访问web
+.method "browse list [url] [
+    ignore shell se [cmd /c start] :url
+]
+;任何位置调用都将会把文件下载到资源目录
+.method "get list [filename url] [localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res ignore shell (se [cmd /c node web.js get] :filename :url) chdir :_dir]
+.method "post list [filename url body header] [ifelse empty? :body [make "body 0][make "body (word "\"\{ bl hair.web.list2json :body "\}\" )] ifelse empty? :header [make "header 0][make "header (word "\"\{ bl hair.web.list2json :header "\}\" )]
+    localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res 
+    ignore shell (se [cmd /c node web.js post] :filename :url :body :header) 
+    chdir :_dir
+]
+;任何位置调用都将会把资源目录中的文件上传到ftp
+.method "upload list [filename dir host username password] [localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res ignore shell (se [cmd /c node web.js upload] :host :username :password :dir :filename) chdir :_dir]
+.method "download list [filename dir host username password] [localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res ignore shell (se [cmd /c node web.js download] :host :username :password :dir :filename) chdir :_dir]
+end
+
+to hair.web.list2json :list
+if empty? :list [op "]
+op word (word "' first :list "':' first bf :list "',) hair.web.list2json bf bf :list
+end
+
+hair.web
+module.out "hweb "class
