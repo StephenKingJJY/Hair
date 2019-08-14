@@ -1,8 +1,0 @@
-;取出数字表中的最小项
-;命令版本号v1.4
-
-to hair.base.min :list
-hair.detect
-op first sort :list
-end
-bury "hair.base.min

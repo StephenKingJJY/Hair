@@ -1,9 +1,0 @@
-;不公开
-;版本号v1.4
-;用于搜寻find目录之后回退到原本的目录
-
-to hair.file.find2 :path
-if empty? :path [stop]
-chdir :path
-end
-bury "hair.file.find2

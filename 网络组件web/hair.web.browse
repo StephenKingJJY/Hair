@@ -1,8 +1,0 @@
-;使用cmd-start实现打开默认浏览器访问web
-;命令版本号v1.4
-
-to hair.web.browse :url
-hair.detect
-ignore shell se [cmd /c start] :url
-end
-bury "hair.web.browse

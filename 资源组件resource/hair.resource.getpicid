@@ -1,8 +1,0 @@
-;通过载入的文件名称获取对应的indexid
-;命令版本号v1.3
-
-to hair.resource.getpicid :n
-hair.detect
-op last item hair.base.index :n firsts :hair_resource_picidlist :hair_resource_picidlist
-end
-bury "hair.resource.getpicid

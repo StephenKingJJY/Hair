@@ -1,8 +1,0 @@
-;该命令相当于make "v :v+1
-;命令版本号v1.4
-
-.macro hair.base.makep :v
-hair.detect
-op (se "make quoted :v [1+] "thing quoted :v)
-end
-bury "hair.base.makep

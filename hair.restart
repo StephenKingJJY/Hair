@@ -1,6 +1,0 @@
-;命令版本号v1.4
-
-to hair.restart
-run [hair.exit hair]
-end
-bury "hair.restart

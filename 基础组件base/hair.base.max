@@ -1,8 +1,0 @@
-;取出数字表中的最大项
-;命令版本号v1.4
-
-to hair.base.max :list
-hair.detect
-op last sort :list
-end
-bury "hair.base.max

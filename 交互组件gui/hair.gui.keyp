@@ -1,8 +1,0 @@
-;判断是否有按键
-;命令版本号v1.3
-
-to hair.gui.keyp
-hair.detect
-ifelse 0 = count :hair_gui_keybuffer [ output "FALSE ] [ output "TRUE ]
-end
-bury "hair.gui.keyp

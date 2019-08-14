@@ -1,8 +1,0 @@
-;简化hair.i18n.text命令
-;命令版本v1.3
-
-to _e :text
-op hair.i18n.text :text
-end
-
-bury "_e
