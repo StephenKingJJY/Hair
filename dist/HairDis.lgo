@@ -1,0 +1,154 @@
+;hair分布式框架
+;类似gui模块需要用户单独加载
+;该文件应当在master和worker节点中同时引入
+;版本号v2.2
+
+
+;---------------------------
+;借鉴fmslogo中的环形网络示例代码
+;主要作用是在各个节点执行同一段命令
+;---------------------------
+to hair.dis.netring :this_machine :remote_port
+; Save as a global value
+make "hair_dis_thismachine :this_machine
+; Queue for saveing data when it cannot go out
+make "hair_dis_savequeue []
+; start the net
+netstartup
+; listen on socket 5124
+ifelse netaccepton 5124+hair.base.delitem 6 :hair_dis_thismachine [] [hair.dis.onreceive] ~
+   [
+   MessageBox "Status [Hit Ok when All Machines have this message up]
+   ] ~
+   [
+   MessageBox "Status [Network failed to setup receive]
+   ]
+if not netconnecton "localhost 5124+:remote_port [hair.dis.onsend] [] ~
+   [
+   MessageBox "Status [Network failed to setup send]
+   ]
+end
+
+to hair.dis.onreceive
+;Make sure it is not empty (which happens when the net first starts up)
+if not emptyp netacceptreceivevalue~
+   [
+   ; pass it along data if it was not this machine that sent it
+   if not equalp first netacceptreceivevalue :hair_dis_thismachine ~
+      [
+      ; if we can't send it now queue it up and we can send it when it's ok
+      if not netconnectsendvalue netacceptreceivevalue ~
+         [
+         make "hair_dis_savequeue fput netacceptreceivevalue :hair_dis_savequeue
+         ]
+      ]
+   ; Run Everything include what we sent
+   run last netacceptreceivevalue
+   ]
+end
+
+to hair.dis.onsend
+; we get here after a send failed and it's ok to send again
+if not emptyp :hair_dis_savequeue~
+   [
+   ; if successful remove from queue and attempt recursively call again in acse there is more
+   if netconnectsendvalue first :hair_dis_savequeue ~
+      [
+      make "hair_dis_savequeue butfirst :hair_dis_savequeue
+      hair.dis.onsend
+      ]
+   ]
+end
+
+to hair.dis.sendcommand :command
+; this sends a command to all machines in the ring including this machine which will
+; be last, if you get the response of your command then you know all the other machines
+; also got it.
+
+; if we can't send it now queue it up and we can send it when it's ok
+if not netconnectsendvalue (list :hair_dis_thismachine :command) ~
+   [
+   make "hair_dis_savequeue fput netacceptreceivevalue :hair_dis_savequeue
+   ]
+end
+
+;----------------------------------
+;创建一个分布式类
+;分布计算开始后，对象封装的动作会使用sendcommand在各个节点间传递定义命令
+;以便在各节点间维持一张相同的任务表和任务结果表
+;首先使用.init方法初始化启动各个节点
+;通过.start方法向各个节点分发任务
+;master通过监听resultlist的变化处理各节点的结果
+;tasklist => [[nodename taskid taskcontent]]
+;resultlist => [[nodename taskid resultcontent]]
+;----------------------------------
+to hair.dis.reg
+new "Distribute "Class
+    .attr [node 1 mynode master _tasklist [] _resultlist [] mastercommand [] _mastercommand [] workercommand [] _workercommand [] _taskid 0]
+    ;设定节点数量，不包括master节点
+    .method "start [[node] [
+        this.node.val :node
+        repeat :node [
+            ' [为每一个worker创建一个供加载的lgo文件]
+            openwrite "distemp.lgo
+            setwrite "distemp.lgo
+            ' [首先加载基础库]
+            pr [(hair "false) hairdis]
+            ' [创建分布式对象，将相关数据做事先定义]
+            pr (se "new quoted this.objname quoted "Distribute)
+            pr list ".mynode.val quoted word "worker repcount
+            pr list "._workercommand.val this._workercommand
+            ' [创建带上特定worker标记的环形连接]
+            ifelse repcount=:node [pr (se "hair.dis.netring quoted word "worker repcount 0)][pr (se "hair.dis.netring quoted word "worker repcount repcount+1)]
+            pr [MINIMIZE "FMSlogo]
+            close "distemp.lgo
+            ignore shell [fmslogo.exe distemp.lgo]
+            wait 10
+            erasefile "distemp.lgo
+        ]
+        ' [启动master的通信连接]
+        hair.dis.netring "master0 1
+    ]]
+    ;为指定节点分派任务，当nodeid传入为balance时将任务均匀分派
+    .method "sendtask [[nodeid taskcontent][
+        if :nodeid = "balance [make "nodeid 1+REMAINDER this._taskid this.node]
+        make "nodeid word "worker :nodeid
+        hair.dis.sendcommand (list word this.objname "._tasklist.val "se word this.objname "._tasklist (list (list :nodeid this._taskid :taskcontent)))
+        this._taskid.val this._taskid+1
+    ]]
+    ;每次只能拿到tasklist中nodeid为自己的一个任务，没有任务时返回空
+    .method "gettask [
+        localmake "_asdf []
+        localmake "_asdf2 map [item 2 ?] this._resultlist
+        foreach this._tasklist [
+            if and this.mynode = first ? not member? item 2 ? :_asdf2 [
+                queue "_asdf bf ?
+            ]
+        ]
+        op :_asdf
+    ]
+    ;向resultlist返回结果值
+    .method "sendresult [[taskid result] [
+        hair.dis.sendcommand (list word this.objname "._resultlist.val "se word this.objname "._resultlist (list (list this.mynode :taskid :result)))
+    ]]
+    ;当worker的task发生变化时执行workercommand
+    .listen "workercommand [this._workercommand.val hair.object.replace this.objname this.workercommand 1]
+    .listen "_tasklist [if this.mynode <> "master [run this._workercommand]]
+    ;当result表发生变更时master节点需要进行相关处理，由用户在创建对象时自行补充实现
+    .listen "mastercommand [this._mastercommand.val hair.object.replace this.objname this.mastercommand 1]
+    .listen "_resultlist [if this.mynode = "master [run this._mastercommand]]
+    ;关掉所有分布式节点
+    .method "stop [
+        hair.dis.sendcommand [bye]
+    ]
+    ;重置任务列表
+    .method "reset [
+        this._tasklist.val []
+        this._resultlist.val []
+    ]
+end
+
+to hairdis
+hair.dis.reg
+pr [hairDis is started.]
+end

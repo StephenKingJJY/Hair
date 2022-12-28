@@ -1,0 +1,10 @@
+﻿make "_projectname first hair.object.select "project
+run se word :_projectname ".title.val quoted "Gobang
+run se word :_projectname ".width.val quoted "600
+run se word :_projectname ".height.val quoted "600
+run se word :_projectname ".mode.val quoted "fs
+run se word :_projectname ".startup.val quoted "main.lgo
+run se word :_projectname ".needGUI.val quoted "true
+run se word :_projectname ".needRes.val quoted "false
+run se word :_projectname ".icon.val quoted "Gobang.ico
+run list word :_projectname ".filelist.val [main.lgo bg.hpic Gobang.ico]

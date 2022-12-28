@@ -1,7 +1,7 @@
 ;hair的模块管理工具，通过module.in和out的简单语法管理库和工程文件
 ;模块引擎会试图记录所有引用的模块，并保证不重复引用以获得更快的执行速度
-;v2.0
-
+;v2.2
+;buildoptions make "buildos [fmslogo ucblogo]
 make "hair_module_handshake []
 ;根据握手的key创建沟通的临时变量make "hair_module_handshake_
 make "hair_module_store []
@@ -9,11 +9,6 @@ make "hair_module_store_what_type []
 make "hair_module_switch "
 make "hair_module_id 1
 make "hair_module_node "true
-
-;输出参数1在参数2的位置
-to hair.module.position :a :b
-repeat count :b [if :a = item repcount :b [op repcount]]
-end
 
 ;输出一个特别的唯一id
 to hair.module.idgen
@@ -38,7 +33,7 @@ queue "hair_module_handshake :_id
 ;这里使用保存下来的路径判断，即不同路径引用同一个模块可能会导致重复载入
 localmake "exist 1
 ifelse not member? :path :hair_module_store [make "exist 0 catch "error [load word :path ".lgo make "exist 1] catch "error [load :path make "exist 1] if :exist = 1 [queue "hair_module_store :path queue "hair_module_store_what_type thing word "hair_module_handshake_ :_id]] [
-    make word "hair_module_handshake_ :_id item hair.module.position :path :hair_module_store :hair_module_store_what_type
+    make word "hair_module_handshake_ :_id item hair.base.index :path :hair_module_store :hair_module_store_what_type
 ]
 ;找不到lgo文件的时候，尝试去加载nodejs模块
 ;通过一个指令去设定是否需要寻找node模块
@@ -112,3 +107,4 @@ localmake "_param "
 foreach :list [make "_param (word :_param "\" ? "\", )]
 op bl :_param
 end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]

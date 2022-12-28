@@ -1,0 +1,23 @@
+﻿;!@Install@!UTF-8!
+GUIMode="2"
+MiscFlags="4"
+RunProgram="fmslogo -w 600 -h 600 -f -l _entry.lgo"
+;!@InstallEnd@!
+7zSFXBuilder_SFXName= C:\Program Files (x86)\FMSLogo\dist\Gobang\Gobang.exe
+7zSFXBuilder_SFXIcon= C:\Program Files (x86)\FMSLogo\dist\Gobang\Gobang.ico
+7zSFXBuilder_UseDefMod=7zsd_LZMA2
+7zSFXBuilder_SFXFile_1= C:\Program Files (x86)\FMSLogo\fmslogo.exe
+7zSFXBuilder_SFXFile_2= C:\Program Files (x86)\FMSLogo\Hair.dll
+7zSFXBuilder_SFXFile_3= C:\Program Files (x86)\FMSLogo\Hair.lgo
+7zSFXBuilder_SFXFile_4= C:\Program Files (x86)\FMSLogo\startup.logoscript
+7zSFXBuilder_SFXFile_5= C:\Program Files (x86)\FMSLogo\logolib\
+7zSFXBuilder_SFXFile_6= C:\Program Files (x86)\FMSLogo\HairGui.lgo
+7zSFXBuilder_SFXFile_7= C:\Program Files (x86)\FMSLogo\dist\Gobang\main.lgo
+7zSFXBuilder_SFXFile_8= C:\Program Files (x86)\FMSLogo\dist\Gobang\bg.hpic
+7zSFXBuilder_SFXFile_9= C:\Program Files (x86)\FMSLogo\dist\Gobang\Gobang.ico
+7zSFXBuilder_SFXFile_10= C:\Program Files (x86)\FMSLogo\dist\Gobang\_entry.lgo
+7zSFXBuilder_SFXFile_11= C:\Program Files (x86)\FMSLogo\dist\Gobang\Gobang.hproj
+7zSFXBuilder_7Zip_Level=Ultra
+7zSFXBuilder_7Zip_Method=LZMA2
+7zSFXBuilder_7Zip_Dictionary=64 MB
+7zSFXBuilder_7Zip_BlockSize=Solid

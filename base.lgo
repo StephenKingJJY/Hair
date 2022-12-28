@@ -1,8 +1,7 @@
 ;基础功能模块
 ;包含2.0之前的base和old功能
 
-
-
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
 ;命令版本v1.2
 ;查看当前目录下所有的文件
 ;包括子目录，查找完之后调回
@@ -10,6 +9,7 @@
 make "_allfiles_list []
 
 to hair.base.allfiles
+if or :hair_fallback_os = "lhogho :hair_fallback_os = "ucblogo [(throw "error [hair.base.allfiles do not supported on your platform.])]
 make "_allfiles_list []
 hair.base.allfiles.repeat
 op :_allfiles_list
@@ -21,59 +21,88 @@ if 2=count directories [stop]
 repeat (count directories)-2 [chdir item repcount+2 directories hair.base.allfiles.repeat popdir]
 end
 
+;命令版本v2.2
+;获取当前时间戳
+
+to hair.base.timemilli.repeat 
+end
+if :hair_fallback_os = "lhogho [make "hair_fallback_handle libload "Kernel32.dll]
+if :hair_fallback_os = "lhogho [external "hair.base.timemilli.repeat  [u4 GetTickCount] :hair_fallback_handle]
+if :hair_fallback_os = "lhogho [libfree :hair_fallback_handle]
+
+to hair.base.timemilli 
+if :hair_fallback_os = "fmslogo [op timemilli]
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.timemilli do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [ifelse :logoplatform = "Windows [
+	op hair.base.timemilli.repeat
+] [openfile "time_temp.htxt "w op last filetimes "time_temp.htxt erasefile "time_temp.htxt]]
+end
+
 ;提供简单的复制文件的功能
-;命令版本号v1.2
+;命令版本号v2.2
+
+to hair.base.copyfile.repeat :1 :2
+end
+if :hair_fallback_os = "lhogho [make "hair_fallback_handle libload "Kernel32.dll]
+if :hair_fallback_os = "lhogho [external "hair.base.copyfile.repeat [v0 CopyFileA s1 s1] :hair_fallback_handle]
+if :hair_fallback_os = "lhogho [libfree :hair_fallback_handle]
 
 to hair.base.copyfile :n1 :n2
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.copyfile do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [ifelse :logoplatform = "Windows [hair.base.copyfile.repeat :n1 :n2 stop][
+	(throw "error [hair.base.copyfile do not supported on your platform.])
+]]
 dllload "Kernel32.dll
 ignore dllcall (list "L "CopyFileA "S :n2 "S :n1)
 dllfree
 end
 
 ;该命令用来重命名文件
-;命令版本号v1.2
+;命令版本号v2.2
 
 to hair.base.rename :n1 :n2
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.rename do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [renamefile :n1 :n2 stop]
 dllload "Kernel32.dll
 ignore dllcall (list "L "MoveFileA "S :n2 "S :n1)
 dllfree
 end
 
-;通过bat变量找到当前hair运行的主目录
 ;whatdir命令名称来自于rebol
 ;GetWorkingDirectory来自David Costanzo在社区中的留言
-;命令版本号v1.4
+;命令版本号v2.2
 
-To hair.base.whatdir
-    Local [workingDirectorySize lastError workingDirectory]
+to hair.base.whatdir
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.whatdir do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [op currentfolder]
 
-    DllLoad "kernel32.dll
+    local [workingDirectorySize lastError workingDirectory]
+
+    dllload "kernel32.dll
 
     ; Call it with a NULL buffer to determine the required buffer size
-    Make "workingDirectorySize Item 1 (DllCall [L GetCurrentDirectoryA L 0 L 0] "kernel32.dll)
-    IfElse :workingDirectorySize = 0 [
-        Make "lastError (DllCall [L GetLastError] "kernel32.dll)
+    make "workingDirectorySize item 1 dllcall [L GetCurrentDirectoryA L 0 L 0]
+    ifelse :workingDirectorySize = 0 [
+        make "lastError dllcall [L GetLastError]
     ][
-        Make "workingDirectory Item 2 (DllCall (List "L "GetCurrentDirectoryA "B :workingDirectorySize "L :workingDirectorySize) "kernel32.dll)
+        make "workingDirectory item 2 dllcall (list "L "GetCurrentDirectoryA "B :workingDirectorySize "L :workingDirectorySize)
     ]
 
-    (DllFree "kernel32.dll)
+    dllfree
 
-    If Name? "lastError [ 
-       (Throw "Error (Word "|Could get the working directory (error=| Item 1 :lastError "|)|))
+    if name? "lastError [ 
+       (throw "Error (word "|Could get the working directory (error=| item 1 :lastError "|)|))
     ]
 
     ; Remove the NUL characters from the buffer
-    Output Filter [NotEqual? Char 0 ? ] :workingDirectory
-End
-
-
+    output filter [NotEqual? char 0 ? ] :workingDirectory
+end
 
 ;输出数组的大小
 ;标准同$array的参数
-;命令版本号v1.4
+;命令版本号v2.2
 ;已知问题包括查看大小之后会改变数组（danger）
-
+;buildoptions make "buildos [fmslogo ucblogo]
 to hair.base.arraysize :a
 if not array? :a [hair.debug.error [param is not an array.] stop]
 ;首先确定有多少个维度，在这里算法是渐进的取每个维度的第一项，直到出错
@@ -99,36 +128,51 @@ localmake "list0 []
 repeat :x [queue "list0 0]
 op :list0
 end
-
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
 
 ;正序排列表
-;命令版本号v1.2
+;命令版本号v2.2
 
 to hair.base.asc :list
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.asc do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [(throw "error [hair.base.asc do not supported on your platform.])]
 op sort :list
 end
 
 ;倒序排列表
-;命令版本号v1.2
+;命令版本号v2.2
 
 to hair.base.desc :list
-op (sort :list "greaterp)
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.desc do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [(throw "error [hair.base.desc do not supported on your platform.])]
+op reverse sort :list
 end
-bury "hair.base.desc
 
+;合并元素
+;字+字=字，表+表=表，字+表=[字 表]
+;数字作为字来判断
+;代码版本v1.2
+
+to hair.base.merge :v1 :v2
+if and word? :v1 word? :v2 [op word :v1 :v2]
+if and list? :v1 list? :v2 [op se :v1 :v2]
+op list :v1 :v2
+end
 
 ;利用del和getitem实现删除指定位置元素的功能
-;命令版本号1.2
+;命令版本号2.2
 
 to hair.base.bmitem :n :v
 ;判断删除的元素超出范围
-if (count :v) < :n [hair.base.error [over the length.] stop]
+if (count :v) < :n [hair.debug.error [over the length.] stop]
 if (count :v) = :n [op bl :v]
 if :n=1 [op bf :v]
 ;保留指定位置之前的数据
-localmake "temp1 hair.base.getitem :n-1 :v
+local "temp1 
+make "temp1 hair.base.getitem :n-1 :v
 ;保留指定位置之后的数据
-localmake "temp2 hair.base.delitem :n :v
+local "temp2 
+make "temp2 hair.base.delitem :n :v
 ;合并前后数据
 op hair.base.merge :temp1 :temp2
 end
@@ -157,19 +201,21 @@ if :n=0 [op :v]
 op hair.base.getitem.repeat :n-1 bl :v
 end
 
-
 ;实现16进制转rgb的功能
-;命令版本号v1.3
+;命令版本号v2.2
 
 to hair.base.hex2rgb :hex
 if "# = first :hex [make "hex bf :hex]
-localmake "myrgb []
-repeat 3 [queue "myrgb hair.base.hex2rgb.repeat hair.base.getitem 2 :hex make "hex bf bf :hex]
+local "myrgb
+make "myrgb []
+repeat 3 [make "myrgb se :myrgb hair.base.hex2rgb.repeat hair.base.getitem 2 :hex make "hex bf bf :hex]
 op :myrgb
 end
 to hair.base.hex2rgb.repeat :hex
-localmake "hexfirst first :hex
-localmake "hexlast last :hex
+local "hexfirst
+make "hexfirst first :hex
+local "hexlast
+make "hexlast last :hex
 ifelse and (ascii :hexfirst)<103 (ascii :hexfirst)>96 [make "hexfirst (ascii :hexfirst)-87][
 if and (ascii :hexfirst)<71 (ascii :hexfirst)>64 [make "hexfirst (ascii :hexfirst)-55]]
 ifelse and (ascii :hexlast)<103 (ascii :hexlast)>96 [make "hexlast (ascii :hexlast)-87][
@@ -180,9 +226,13 @@ end
 ;查找元素在表中的位置
 ;版本v2.0
 to hair.base.index :v :list
-op hair.module.position :v :list
+repeat count :list [
+    if :v = item repcount :list [op repcount]
+]
+op 0
 end
 
+;buildoptions make "buildos [fmslogo ucblogo]
 ;输入左上角为原点坐标系的坐标值
 ;输出logo原生坐标值
 ;命令版本号v1.3
@@ -211,18 +261,31 @@ end
 op (se "make quoted :v [-1+] "thing quoted :v)
 end
 
-
 ;该命令相当于make "v :v+1
 ;命令版本号v1.4
 
 .macro hair.base.makep :v
 op (se "make quoted :v [1+] "thing quoted :v)
 end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
+
+;buildoptions make "buildos [lhogho]
+to hair.base.makem :v
+make :v 1+thing :v
+end
+to hair.base.makep :v
+make :v -1+thing :v
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
 
 ;取出数字表中的最大项
 ;命令版本号v1.4
 
 to hair.base.max :list
+if :hair_fallback_os = "ucblogo [
+    output reduce [ifelse ?1 > ?2 [?1] [?2]] :list
+]
+if :hair_fallback_os = "lhogho [(throw "error [hair.base.max do not supported on your platform.])]
 op last sort :list
 end
 
@@ -230,27 +293,22 @@ end
 ;命令版本号v1.4
 
 to hair.base.min :list
+if :hair_fallback_os = "ucblogo [
+    output reduce [ifelse ?1 < ?2 [?1] [?2]] :list
+]
+if :hair_fallback_os = "lhogho [(throw "error [hair.base.min do not supported on your platform.])]
 op first sort :list
-end
-
-;合并元素
-;字+字=字，表+表=表，字+表=[字 表]
-;数字作为字来判断
-;代码版本v1.2
-
-to hair.base.merge :v1 :v2
-if and word? :v1 word? :v2 [op word :v1 :v2]
-if and list? :v1 list? :v2 [op se :v1 :v2]
-op list :v1 :v2
 end
 
 ;处理随机函数的小数问题
 ;给内置的随机函数增加小数位数和起止点的参数
 ;包括起点不包括终点
-;命令版本号v1.4
+;命令版本号v2.2
 
 to hair.base.random :s :e
-localmake "sew hair.base.max se hair.base.random.repeat :s hair.base.random.repeat :e
+if not :hair_fallback_os = "ucblogo [(rerandom hair.base.timemilli)]
+local "sew
+ifelse (hair.base.random.repeat :s) > hair.base.random.repeat :e [make "sew hair.base.random.repeat :s] [make "sew hair.base.random.repeat :e]
 if :sew = 0 [op :s + random (:e - :s)]
 op :s + (random round :e*:sew-:s*:sew)/:sew
 end
@@ -264,23 +322,23 @@ end
 
 ;随机生成一个指定位数的数字字母混合字符串
 ;不区分大小写
-;命令版本号v1.4
+;命令版本号v2.2
 
 to hair.base.token :l
 ;用timemilli初始化随机数列
-(rerandom timemilli)
+if not :hair_fallback_os = "ucblogo [(rerandom hair.base.timemilli)]
 ;生成指定位数的表，由0-35之间的数字组成
-localmake "tokenlist []
-localmake "tokenlist2 "
-repeat :l [queue "tokenlist random 36]
+local "tokenlist
+make "tokenlist []
+local "tokenlist2 
+make "tokenlist2 "
+repeat :l [make "tokenlist se :tokenlist random 36]
 ;将随机数转化成数字和字母
-foreach :tokenlist [
-  ifelse ? > 9 [make "tokenlist2 word :tokenlist2 char 97+?-10][make "tokenlist2 word :tokenlist2 ?]
+repeat count :tokenlist [
+  ifelse (item repcount :tokenlist) > 9 [make "tokenlist2 word :tokenlist2 char 97+(item repcount :tokenlist)-10][make "tokenlist2 word :tokenlist2 (item repcount :tokenlist)]
 ]
 op :tokenlist2
 end
-
-
 
 ;对空字表取首会报错，而不是像pclogo那样返回一个空值
 ;涉及到编码习惯不好处理
@@ -306,72 +364,74 @@ if empty? :x [
 op last :x
 end
 
-
 ;设置主窗口的标题
 ;命令版本号v1.2
 
 to hair.base.settitle :title
-  dllload "user32.dll
-  localmake "result dllcall (list "L "SetWindowTextA "S :title "L :hair_hwnd)
-  dllfree 
+if :hair_fallback_os = "ucblogo [(throw "error [hair.base.settitle do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [(throw "error [hair.base.settitle do not supported on your platform.])]
+dllload "user32.dll
+local "result
+make "result dllcall (list "L "SetWindowTextA "S :title "L :hair_hwnd)
+dllfree 
 end
 
 ;增加回调功能
-;命令版本v1.4
+;命令版本v2.2.1
 ;提供四种模式cmd（最快速），bat（兼容），vbs（静默），bat+vbs（兼容+静默，最慢）
 ;如果l为字，则视为一个文件名，如果为表，则视为一个表
-
+;buildoptions make "buildos [fmslogo ucblogo]
 to hair.base.shell :l [:callback "nooutput] [:mode "cmd] [:waitfile "nooutput]
 ifelse word? :l [
   localmake "_output shell :l
 ][
 if :mode = "cmd [localmake "_output shell se [cmd /c] :l]
 if :mode = "bat [
-  openwrite "shell_temp.bat
+  (openwrite "shell_temp.bat "true)
   setwrite "shell_temp.bat
   pr :l
-  localmake "_output shell [shell_temp.bat]
   setwrite []
   close "shell_temp.bat
+  localmake "_output shell [shell_temp.bat]
 ]
 if :mode = "vbs [
-  openwrite "shell_temp.vbs
+  (openwrite "shell_temp.vbs "true)
   setwrite "shell_temp.vbs
   pr (se [createobject("wscript.shell").run "cmd /c] :l [",0])
-  localmake "_output shell [wscript shell_temp.vbs]
   setwrite []
   close "shell_temp.vbs
+  localmake "_output shell [wscript shell_temp.vbs]
 ]
 if :mode = "batvbs [
-  openwrite "shell_temp.bat
+  (openwrite "shell_temp.bat "true)
   setwrite "shell_temp.bat
   pr :l
   close "shell_temp.bat
-  openwrite "shell_temp.vbs
+  (openwrite "shell_temp.vbs "true)
   setwrite "shell_temp.vbs
   pr [createobject("wscript.shell").run "shell_temp.bat",0]
-  localmake "_output shell [wscript shell_temp.vbs]
   setwrite []
   close "shell_temp.vbs
+  localmake "_output shell [wscript shell_temp.vbs]
 ]]
-if :callback = "nooutput [if not :mode = "cmd [erf "shell_temp.vbs erf "shell_temp.bat] op :_output]
+;if :callback = "nooutput [if not :mode = "cmd [erf "shell_temp.vbs erf "shell_temp.bat] op :_output]
+if :callback = "nooutput [op :_output]
 ifelse :waitfile = "nooutput [
   do.until [wait 1] [member? :callback files]][
   do.until [wait 1] [member? :waitfile files]
 ]
 openread :callback
 setread :callback
-make "_output .readrawline
+make "_output readrawline
 setread []
 close :callback
 erf :callback erf "shell_temp.vbs erf "shell_temp.bat
+if not :waitfile = "nooutput [erf :waitfile]
 op :_output
 end
 
-
 ;获取一个空闲的海龟编号
 ;命令版本号v1.2
-
 to hair.base.turtlefree
 local "i
 for [i 41 1000] [if not member? :i :hair_turtle [make "hair_turtle se :hair_turtle :i op :i]]
@@ -406,7 +466,53 @@ if and list? :v 1=count :v [make "v first :v]
 if word? :a [make "a thing :a]
 ifelse list? :v [mdsetitem map [? + 1] :v :a :c][setitem :v+1 :a :c]
 end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
 
+;buildoptions make "buildos [lhogho]
+to hair.old.array :x :m
+(local "_ns "_nw)
+make "_ns 1
+make "_nw []
+repeat count :x [make "_ns :_ns*item repcount :x]
+ifelse equal? "r hair.base.safefirst :m [(rerandom hair.base.timemilli) repeat :_ns [make "_nw fput random bf :m :_nw]] [repeat :_ns [make "_nw fput :m :_nw]]
+make "_nw fput bf :x reverse :_nw
+op :_nw
+end
+to hair.old.arrayid :x :l
+(local "_head "_kkk "_headc)
+make "_head first :x
+make "x bf :x
+make "_kkk 0
+make "_headc count :_head
+repeat :_headc [make "_kkk :_kkk+hair.old.arrayid.repeat first :l :_head make "l bf :l make "_head bf :_head]
+make "_kkk :_kkk+(last :l)+1
+op :_kkk
+end
+to hair.old.arrayid.repeat :fl :he
+if empty? :he [op :fl]
+op product first :he hair.old.arrayid.repeat :fl bf :he
+end
+to hair.old.aget :x :l
+op item hair.old.arrayid :x :l bf :x
+end
+to hair.old.aset :x :l :v
+local "wat
+if not list? :x [make "x thing :x]
+make "wat hair.old.arrayid :x :l
+op (se (hair.base.getitem :wat :x) (list :v) (hair.base.delitem :wat+1 :x))
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
+
+;buildoptions make "buildos [fmslogo ucblogo]
+;pclogo时代tt在屏幕上输出文字命令
+;命令版本号v1.2
+
+to hair.old.tt :text
+rt 90 label :text lt 90
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
+
+;buildoptions make "buildos [fmslogo]
 ;pclogo时代设置字体和字号的指令
 ;命令版本号v1.3
 ;colour  (optional font colour, default current SETPENCOLOR)
@@ -421,25 +527,21 @@ to hair.old.setfont :height :width [:font []] [:colour []] [:effects []]
 	ifelse memberp "U :effects [ localmake "underline 1 ] [ localmake "underline 0 ]
 	setlabelfont (list :font :height :width 0 :bold :italic :underline)
 end
-
-;pclogo时代tt在屏幕上输出文字命令
-;命令版本号v1.2
-
-to hair.old.tt :text
-rt 90 label :text lt 90
-end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
 
 ;file里面的命令
 ;用来查看当前目录下所有的指定扩展名的文件
-;命令版本v1.2
+;命令版本v2.2
 
 to hair.file.extension :e
-hair.detect
-op hair.file.extension.repeat files [] :e
+if :hair_fallback_os = "ucblogo [(throw "error [hair.file.extension do not supported on your platform.])]
+if :hair_fallback_os = "lhogho [op hair.file.extension.repeat files ". [] :e]
+op hair.file.extension.repeat files [] :e 1
 end
 to hair.file.extension.repeat :curfile :curfile2 :e
 if empty? :curfile [op :curfile2]
-localmake "exfile first :curfile
+local "exfile
+make "exfile first :curfile
 if (count :exfile)>(count :e)+1 [
   if :e = hair.base.delitem (count :exfile)-(count :e) :exfile [
     make "curfile2 se :curfile2 :exfile
@@ -447,3 +549,22 @@ if (count :exfile)>(count :e)+1 [
 ]
 op hair.file.extension.repeat bf :curfile :curfile2 :e
 end
+
+;buildoptions make "buildos [fmslogo]
+;将logo窗口居中
+;命令版本v2.2
+
+to hair.base.movewindow
+dllload "User32.dll
+dllcall (list "L "MoveWindow "W "1 "L (item 13 machine) "L (item 12 machine) "L ((item 9 machine)-(item 13 machine))/2 "L ((item 8 machine)-(item 12 machine))/2 "L :hair_hwnd)
+(dllfree "User32.dll)
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
+
+;buildoptions make "buildos [fmslogo]
+;获取鼠标在屏幕上的logo坐标，用在五子棋的demo里，好像某个版本中被删掉了
+;命令版本v2.2.1
+to hair.base.mousexy
+op $screenxy mousepos
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]

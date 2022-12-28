@@ -2,7 +2,7 @@
 ;依赖node相关模块系统会在主目录下自动加载
 ;命令版本号V2.0
 ;如果find模式不能正确匹配到文件，通常这是由于不同目录下存在相同的文件名，可以通过修改_path来指定目录
-;增加输出文件大小，iconv，find路径优化，7z压缩
+;增加输出文件大小，iconv，find路径优化，zip压缩
 
 make "_dir_restore hair.base.whatdir
 chdir :hair_maindir
@@ -123,7 +123,7 @@ end
 
 ;单独的过程用来转换文件编码格式
 ;使用nodejs
-;命令版本号v2.0
+;命令版本号v2.2.1
 ;不公开
 
 to hair.file.iconv :name :fcode :tcode
@@ -138,10 +138,11 @@ chdir :_dir_restore
 ;删除原本的文件
 erasefile :name
 ;将转化后的文件拷贝回来
-hair.base.copyfile (word :hair_maindir "\\ :hair_res "\\ :name) :name
+hair.base.copyfile (word :hair_maindir "\\ :hair_res "\\_iconv_temp) :name
 ;删除资源文件夹中的文件
 chdir :hair_maindir
 chdir :hair_res
+erasefile "_iconv_temp
 erasefile :name
 chdir :_dir_restore
 end
@@ -179,7 +180,24 @@ to hair.file.uncompress :archive
 openwrite "_com_temp
 setwrite "_com_temp
 pr se [var a=require] (word "\(\" hair.file.path :hair_maindir "\\\\ :hair_res "\\\\file.js "\"\)  )
-pr (word "a.unzip\(\" :archive "\",__dirname\) )
+pr (word "a.unzip\(\" :archive "\",__dirname\))
+setwrite []
+close "_com_temp
+ignore (shell [node _com_temp] "true)
+erasefile "_com_temp
+end
+
+;压缩一个目录
+;命令版本号v2.2.1
+;不公开
+
+to hair.file.compressdir :archive :zipname
+;创建一个nodejs文件来执行
+openwrite "_com_temp
+setwrite "_com_temp
+pr [var path=require("path")]
+pr se [var a=require] (word "\(\" hair.file.path :hair_maindir "\\\\ :hair_res "\\\\file.js "\"\)  )
+pr (word "a.zipDir\(path.join\(__dirname,\" :archive "\"\),path.join\(__dirname,\" :zipname "\"\)\))
 setwrite []
 close "_com_temp
 ignore (shell [node _com_temp] "true)

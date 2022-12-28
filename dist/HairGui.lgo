@@ -1,8 +1,8 @@
-;ÓëmoduleÒıÓÃµÄÄ£¿é²»Í¬£¬hairguiÏÖÔÚÊÇµ¥¶ÀµÄ³ÌĞò
-;ÊµÏÖguiµÄ¸÷Àà×é¼ş¼°½»»¥¹¦ÄÜ
-;ÃüÁî°æ±¾ºÅv2.1
+ï»¿;ä¸moduleå¼•ç”¨çš„æ¨¡å—ä¸åŒï¼Œhairguiç°åœ¨æ˜¯å•ç‹¬çš„ç¨‹åº
+;å®ç°guiçš„å„ç±»ç»„ä»¶åŠäº¤äº’åŠŸèƒ½
+;å‘½ä»¤ç‰ˆæœ¬å·v2.2.1
 
-;¸ºÔğÏìÓ¦Êó±êÒÆ¶¯ĞĞÎª£¬¼´ÅĞ¶ÏÄÄÒ»¸ö»­²¼µÃµ½hover×´Ì¬
+;è´Ÿè´£å“åº”é¼ æ ‡ç§»åŠ¨è¡Œä¸ºï¼Œå³åˆ¤æ–­å“ªä¸€ä¸ªç”»å¸ƒå¾—åˆ°hoverçŠ¶æ€
 to hair.gui.mousehover :canvaslist :canvasparam
 ;pr se :canvaslist :canvasparam
 	make "hair_gui_curhover "
@@ -10,67 +10,54 @@ to hair.gui.mousehover :canvaslist :canvasparam
 		make "_guicurhover ?
 		if hair.gui.inrange mousepos list first :_guicurhover first bf :_guicurhover last bl :_guicurhover last :_guicurhover [make "hair_gui_curhover item # :canvaslist throw "findwhichhover]
 	]]
-	' [Èç¹ûÃ»ÓĞÈÎºÎ»­²¼±»hover£¬Ôò×´Ì¬È«²¿Ì®ËõÎªwait]
-	' [Ä³¸ö»­²¼±»hover£¬ÆäËû»­²¼±äÎªwait£¬¸Ã»­²¼ÎªpressÊ±£¬×´Ì¬²»±ä£¬hover²»±ä£¬²»¿ÉÄÜÊÇclick£¬½öµ±ÎªwaitµÄÊ±ºò±ä³Éhover]
+	' [å¦‚æœæ²¡æœ‰ä»»ä½•ç”»å¸ƒè¢«hoverï¼Œåˆ™çŠ¶æ€å…¨éƒ¨åç¼©ä¸ºwait]
+	' [æŸä¸ªç”»å¸ƒè¢«hoverï¼Œå…¶ä»–ç”»å¸ƒå˜ä¸ºwaitï¼Œè¯¥ç”»å¸ƒä¸ºpressæ—¶ï¼ŒçŠ¶æ€ä¸å˜ï¼Œhoverä¸å˜ï¼Œä¸å¯èƒ½æ˜¯clickï¼Œä»…å½“ä¸ºwaitçš„æ—¶å€™å˜æˆhover]
 	ifelse empty? :hair_gui_curhover [
 		if :hair_gui_stillhover = 0 [
-			foreach :canvaslist [hair.background.async se word ? ".mousestatus.val quoted "wait]
+			foreach :canvaslist [run se word ? ".mousestatus.val quoted "wait]
 			make "hair_gui_stillhover 1
 		]
 	] [
 		make "hair_gui_stillhover 0
-		foreach remove :hair_gui_curhover :canvaslist [hair.background.async se word ? ".mousestatus.val quoted "wait]
-		if "wait = run word :hair_gui_curhover ".mousestatus [hair.background.async se word :hair_gui_curhover ".mousestatus.val quoted "hover]
+		foreach remove :hair_gui_curhover :canvaslist [run se word ? ".mousestatus.val quoted "wait]
+		if "wait = run word :hair_gui_curhover ".mousestatus [run se word :hair_gui_curhover ".mousestatus.val quoted "hover]
 	]
 end
 
-to hair.gui.reg
-make "hair_gui_listenkey "false ;Ä¬ÈÏ²»ÆôÓÃ¼üÅÌ¼àÌı
-make "hair_gui_listenmouse "true ;Ä¬ÈÏÆôÓÃÊó±ê¼àÌı
-make "hair_gui_keylock " ;Ê¹hair¿ò¼ÜÖĞ×é¼şµÃÒÔ¶ÀÏí¼üÅÌĞÅÏ¢
-make "hair_gui_keybuffer [] ;¼üÅÌ°´¼ü»º´æ
-make "hair_gui_stillhover 1 ;Êó±êhoverĞÔÄÜ
-make "hair_gui_scenebackground hair.base.turtlefree ;»ñÈ¡Ò»Ö»º£¹ê»­³¡¾°µÄ±³¾°
-make "hair_gui_scene " ;µ±Ç°µÄ³¡¾°
-
-;¸ºÔğÏìÓ¦Êó±êµÄ°´ÏÂĞĞÎª£¬¼´ÅĞ¶ÏÄÄ¸ö»­²¼µÃµ½press×´Ì¬
-hook "hair_gui_mousepress [
+to hair_gui_mousepress
+;è´Ÿè´£å“åº”é¼ æ ‡çš„æŒ‰ä¸‹è¡Œä¸ºï¼Œå³åˆ¤æ–­å“ªä¸ªç”»å¸ƒå¾—åˆ°pressçŠ¶æ€
 	ifelse empty? :hair_gui_curhover [
 	make "hair_gui_curpress "
 	catch "findwhichpress [foreach run word :hair_gui_scene ".canvas [
 		make "_guicurpress ?
 		if hair.gui.inrange mousepos hair.base.logoxy se run word :_guicurpress ".xpos run word :_guicurpress ".ypos run word :_guicurpress ".width run word :_guicurpress ".height [make "hair_gui_curpress :_guicurpress throw "findwhichpress]
 	]]][make "hair_gui_curpress :hair_gui_curhover]
-	' [Êó±ê²»ÔÚÈÎºÎ»­²¼ÖĞ£¬¼´±íÊ¾Ëæ±ãÂÒµãµÄ£¬²»×ö²Ù×÷]
-	' [ÔÚÄ³¸ö»­²¼ÖĞ°´ÏÂ£¬»­²¼×´Ì¬²»¿ÉÄÜclick£¬²»¿ÉÄÜÊÇpress£¬¼«Ğ¡¸ÅÂÊwait£¬hover¸ÄÎªpress]
+	' [é¼ æ ‡ä¸åœ¨ä»»ä½•ç”»å¸ƒä¸­ï¼Œå³è¡¨ç¤ºéšä¾¿ä¹±ç‚¹çš„ï¼Œä¸åšæ“ä½œ]
+	' [åœ¨æŸä¸ªç”»å¸ƒä¸­æŒ‰ä¸‹ï¼Œç”»å¸ƒçŠ¶æ€ä¸å¯èƒ½clickï¼Œä¸å¯èƒ½æ˜¯pressï¼Œæå°æ¦‚ç‡waitï¼Œhoveræ”¹ä¸ºpress]
 	ifelse empty? :hair_gui_curpress [
 	] [
 		if member? run word :hair_gui_curpress ".mousestatus [wait hover] [run se word :hair_gui_curpress ".mousestatus.val quoted "press]
 	]
-]
-;¸ºÔğÏìÓ¦Êó±êµÄËÉ¿ªĞĞÎª£¬¼´ÅĞ¶ÏÄÄ¸ö»­²¼µÃµ½click×´Ì¬
-hook "hair_gui_mouseclick [
+end
+
+;å°è¯•æå‡clickçš„æ•ˆç‡ï¼Œå‘ç°æ˜¯mouseonæœ¬èº«çš„é—®é¢˜
+to hair_gui_mouseclick
+;è´Ÿè´£å“åº”é¼ æ ‡çš„æ¾å¼€è¡Œä¸ºï¼Œå³åˆ¤æ–­å“ªä¸ªç”»å¸ƒå¾—åˆ°clickçŠ¶æ€
 	ifelse empty? :hair_gui_curhover [
 	make "hair_gui_curclick "
 	catch "findwhichclick [foreach run word :hair_gui_scene ".canvas [
 		make "_guicurclick ?
 		if hair.gui.inrange mousepos hair.base.logoxy se run word :_guicurclick ".xpos run word :_guicurclick ".ypos run word :_guicurclick ".width run word :_guicurclick ".height [make "hair_gui_curclick :_guicurclick throw "findwhichclick]
 	]]][make "hair_gui_curclick :hair_gui_curhover]
-	' [Êó±ê²»ÔÚÈÎºÎ»­²¼ÖĞ£¬¼´±íÊ¾Ëæ±ãÂÒµãµÄ£¬²»×ö²Ù×÷]
-	' [ÔÚÄ³¸ö»­²¼ÖĞËÉ¿ª£¬»­²¼×´Ì¬±ØĞëÎªpress£¬²Å²úÉúÒ»´Îclick£¬È»ºó»Øµ½hover]
+	' [é¼ æ ‡ä¸åœ¨ä»»ä½•ç”»å¸ƒä¸­ï¼Œå³è¡¨ç¤ºéšä¾¿ä¹±ç‚¹çš„ï¼Œä¸åšæ“ä½œ]
+	' [åœ¨æŸä¸ªç”»å¸ƒä¸­æ¾å¼€ï¼Œç”»å¸ƒçŠ¶æ€å¿…é¡»ä¸ºpressï¼Œæ‰äº§ç”Ÿä¸€æ¬¡clickï¼Œç„¶åå›åˆ°hover]
 	ifelse empty? :hair_gui_curclick [
 	] [
 		if "press = run word :hair_gui_curclick ".mousestatus [run se word :hair_gui_curclick ".mousestatus.val quoted "click run se word :hair_gui_curclick ".mousestatus.val quoted "hover]
 	]
-]
+end
 
-new "hair_timer_keyboard "Timer
-	.delay.value 10
-	.mode.value "noyield
-	.command.value [if not (or empty? :hair_gui_scene not :hair_gui_listenkey) [hair.hook.create "hair_gui_key]]
-	.start
-
-hook "hair_gui_key [
+to hair_gui_key 
 	if hair.gui.keyp [
 		make "_curkey hair.gui.getkey
 		ifelse empty? :hair_gui_keylock [
@@ -80,60 +67,74 @@ hook "hair_gui_key [
 			run se word :hair_gui_keylock ".keyall :_curkey
 		]
 	]
-]
+end
 
-;´´½¨³¡¾°Àà£¬ÓÃÀ´Í³Ò»¹ÜÀí»­²¼ÔªËØ
+to hair.gui.reg
+make "hair_gui_listenkey "false ;é»˜è®¤ä¸å¯ç”¨é”®ç›˜ç›‘å¬
+make "hair_gui_listenmouse "true ;é»˜è®¤å¯ç”¨é¼ æ ‡ç›‘å¬
+make "hair_gui_keylock " ;ä½¿hairæ¡†æ¶ä¸­ç»„ä»¶å¾—ä»¥ç‹¬äº«é”®ç›˜ä¿¡æ¯
+make "hair_gui_keybuffer [] ;é”®ç›˜æŒ‰é”®ç¼“å­˜
+make "hair_gui_stillhover 1 ;é¼ æ ‡hoveræ€§èƒ½
+;ä¸ç‰¹åˆ«ä½¿ç”¨æµ·é¾Ÿç”»åœºæ™¯ï¼Œé¿å…æµ·é¾Ÿé—ªçƒçš„bug
+;make "hair_gui_scenebackground hair.base.turtlefree ;è·å–ä¸€åªæµ·é¾Ÿç”»åœºæ™¯çš„èƒŒæ™¯
+make "hair_gui_scene " ;å½“å‰çš„åœºæ™¯
+
+new "hair_timer_keyboard "Timer
+	.delay.value 1
+	.mode.value "noyield
+	.command.value [if not (or empty? :hair_gui_scene not :hair_gui_listenkey) [hair_gui_key]]
+	.start
+
+;åˆ›å»ºåœºæ™¯ç±»ï¼Œç”¨æ¥ç»Ÿä¸€ç®¡ç†ç”»å¸ƒå…ƒç´ 
 new "Scene "Class
-.attr [canvas [] key [] background [hair.old.tt "Scene] canvas_param[] listenkey false keyallobj 0] ;´Ë³¡¾°ÖĞÈİÄÉµÄÔªËØ£¬Ò»¸öÔªËØ½ö¿ÉÒÔ±»Ò»¸ö³¡¾°µ÷ÓÃ,key[67 Button1 [wakka] 68 Button1 [] 69 Button2 []]
-.method "render [make "hair_gui_keybuffer [] make "hair_gui_listenmouse "false make "hair_gui_listenkey "false cs ask :hair_gui_scenebackground [ht pu setpos hair.base.logoxy [0 0] pd run this.background] make "hair_gui_scene this.objname
+.attr [canvas [] key [] background [hair.old.tt "Scene] canvas_param[] listenkey false keyallobj 0] ;æ­¤åœºæ™¯ä¸­å®¹çº³çš„å…ƒç´ ï¼Œä¸€ä¸ªå…ƒç´ ä»…å¯ä»¥è¢«ä¸€ä¸ªåœºæ™¯è°ƒç”¨,key[67 Button1 [wakka] 68 Button1 [] 69 Button2 []]
+.method "render [make "hair_gui_keybuffer [] make "hair_gui_listenmouse "false make "hair_gui_listenkey "false cs ht pu setpos hair.base.logoxy [0 0] pd run this.background make "hair_gui_scene this.objname
 	this.canvas_param.val []
 	foreach this.canvas [make "_sceneitem ? this.canvas_param.val se this.canvas_param bf list [] se hair.base.logoxy se run word :_sceneitem ".xpos run word :_sceneitem ".ypos se run word :_sceneitem ".width run word :_sceneitem ".height run se word :_sceneitem ".keepback.val 0 if run word :_sceneitem ".display [run word :_sceneitem "._render]]
 	make "hair_gui_listenmouse "true make "hair_gui_listenkey this.listenkey
-	if not (or empty? :hair_gui_scene not :hair_gui_listenmouse) [run se [mouseon [hair.hook.create "hair_gui_mousepress][hair.hook.create "hair_gui_mouseclick][][]] (list (list "hair.gui.mousehover this.canvas this.canvas_param))]
-	keyboardon [queue "hair_gui_keybuffer keyboardvalue]] ;ÇĞ»»µ½¸Ã³¡¾°£¬Çå¿ÕÖ®Ç°³¡¾°µÄËùÓĞÊı¾İ¡¢ÔªËØºÍ¼üÊó½»»¥¼ì²â
+	if not (or empty? :hair_gui_scene not :hair_gui_listenmouse) [run se [mouseon [hair_gui_mousepress][hair_gui_mouseclick][][]] (list (list "hair.gui.mousehover this.canvas this.canvas_param))]
+	keyboardon [queue "hair_gui_keybuffer keyboardvalue]] ;åˆ‡æ¢åˆ°è¯¥åœºæ™¯ï¼Œæ¸…ç©ºä¹‹å‰åœºæ™¯çš„æ‰€æœ‰æ•°æ®ã€å…ƒç´ å’Œé”®é¼ äº¤äº’æ£€æµ‹
 .method "collision [[xy wd canvas][localmake "newcanvas remove :canvas this.canvas repeat count :newcanvas [make "_sceneitem item repcount :newcanvas
 	if run word :_sceneitem ".display [
-		if not hair.gui.collision hair.base.logoxy :xy :wd hair.base.logoxy se run word :_sceneitem ".xpos run word :_sceneitem ".ypos se run word :_sceneitem ".width run word :_sceneitem ".height [op "false]]] op "true ]] ;ÅĞ¶Ï´«µİµÄ²ÎÊıÓë¸Ã³¡¾°ÄÚµÄÆäËûÏÔĞÔÔªËØÖ®¼äÊÇ·ñ³åÍ»
-.method "addcanvas [[canvas][this.canvas.val se this.canvas :canvas]] ;¸øcanvas³õÊ¼»¯·½·¨µ÷ÓÃ
+		if not hair.gui.collision hair.base.logoxy :xy :wd hair.base.logoxy se run word :_sceneitem ".xpos run word :_sceneitem ".ypos se run word :_sceneitem ".width run word :_sceneitem ".height [op "false]]] op "true ]] ;åˆ¤æ–­ä¼ é€’çš„å‚æ•°ä¸è¯¥åœºæ™¯å†…çš„å…¶ä»–æ˜¾æ€§å…ƒç´ ä¹‹é—´æ˜¯å¦å†²çª
+.method "addcanvas [[canvas][this.canvas.val se this.canvas :canvas]] ;ç»™canvasåˆå§‹åŒ–æ–¹æ³•è°ƒç”¨
 .method "addapply [[apply canvas command][this.key.val (se this.key :apply :canvas (list :command))]]
-.listen "keyallobj [if this.keyallobj.h = this.keyallobj [cancel] make "hair_gui_keylock this.keyallobj foreach this.canvas [run se word ? "._keyall.val quoted this.keyallobj]] ;µ±Ò»¸ö»­²¼ÉêÇëÈ«¾Ö¼àÌıÊ±£¬Í¨ÖªÆäËû»­²¼
+.listen "keyallobj [if this.keyallobj.h = this.keyallobj [cancel] make "hair_gui_keylock this.keyallobj foreach this.canvas [run se word ? "._keyall.val quoted this.keyallobj]] ;å½“ä¸€ä¸ªç”»å¸ƒç”³è¯·å…¨å±€ç›‘å¬æ—¶ï¼Œé€šçŸ¥å…¶ä»–ç”»å¸ƒ
 
-;´´½¨»­²¼Àà£¬»­²¼²ÉÓÃ×óÉÏ½ÇÎªÔ­µãµÄ×ø±êÏµ
-;v2.1£¬ÎªÁË¿ìËÙÏìÓ¦£¬»­²¼ÏÖÔÚ²»ÄÜÔÚ³¡¾°renderÖ®ºóÔÙµ÷Õû´óĞ¡Î»ÖÃ
-;¶¯»­¹¦ÄÜ¿ÉÄÜÒª×öÁíÍâµÄÀàÀ´ÔÚºóĞø°æ±¾ÖĞÊµÏÖ
+;åˆ›å»ºç”»å¸ƒç±»ï¼Œç”»å¸ƒé‡‡ç”¨å·¦ä¸Šè§’ä¸ºåŸç‚¹çš„åæ ‡ç³»
+;v2.1ï¼Œä¸ºäº†å¿«é€Ÿå“åº”ï¼Œç”»å¸ƒç°åœ¨ä¸èƒ½åœ¨åœºæ™¯renderä¹‹åå†è°ƒæ•´å¤§å°ä½ç½®
 new "Canvas "Class
-.attr [width 100 height 100 xpos 0 ypos 0 display true scene 0 _drawp [] draw [pu setxy xcor+1 ycor-1 pd repeat 2 [rt 90 fd this.width - 2 rt 90 fd this.height - 2] SETFLOODCOLOR 4 pu setxy xcor+1 ycor-1 pd fill hair.old.tt this.mousestatus] keepback 0 turtle 0 mousestatus wait noflicker false _keyall 0]
-.before [this.turtle.val hair.base.turtlefree this._drawp.val hair.object.replace this.objname this.draw 1] ;´´½¨»­²¼Ê±»ñÈ¡Ò»¸ö¿ÕÏĞº£¹ê
-;.listen "width [if this.width = this.width.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "Î»ÖÃ³åÍ» cancel] [( this._render se this.xpos this.ypos se this.width.h this.height )]]]
-;.listen "height [if this.height = this.height.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "Î»ÖÃ³åÍ» cancel] [( this._render se this.xpos this.ypos se this.width this.height.h )]]]
-;.listen "xpos [if this.xpos = this.xpos.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "Î»ÖÃ³åÍ» cancel] [( this._render se this.xpos.h this.ypos se this.width this.height )]]]
-;.listen "ypos [if this.ypos = this.ypos.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "Î»ÖÃ³åÍ» cancel] [( this._render se this.xpos this.ypos.h se this.width this.height )]]]
-.listen "display [if this.display = this.display.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "Î»ÖÃ³åÍ» cancel] [( this._render se this.xpos this.ypos se this.width this.height )]]]
+.attr [width 100 height 100 xpos 0 ypos 0 display true scene 0 _drawp [] draw [pu setxy xcor+1 ycor-1 pd repeat 2 [rt 90 fd this.width - 2 rt 90 fd this.height - 2] SETFLOODCOLOR 4 pu setxy xcor+1 ycor-1 pd fill hair.old.tt this.mousestatus] keepback 0 mousestatus wait noflicker false _keyall 0]
+.before [this._drawp.val hair.object.replace this.objname this.draw 1]
+;.listen "width [if this.width = this.width.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "ä½ç½®å†²çª cancel] [( this._render se this.xpos this.ypos se this.width.h this.height )]]]
+;.listen "height [if this.height = this.height.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "ä½ç½®å†²çª cancel] [( this._render se this.xpos this.ypos se this.width this.height.h )]]]
+;.listen "xpos [if this.xpos = this.xpos.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "ä½ç½®å†²çª cancel] [( this._render se this.xpos.h this.ypos se this.width this.height )]]]
+;.listen "ypos [if this.ypos = this.ypos.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "ä½ç½®å†²çª cancel] [( this._render se this.xpos this.ypos.h se this.width this.height )]]]
+.listen "display [if this.display = this.display.h [cancel] if and this.scene = :hair_gui_scene this.display = "true [ifelse not run se word this.scene ".collision se list se this.xpos this.ypos se this.width this.height quoted this.objname [hair.debug.error _e "ä½ç½®å†²çª cancel] [( this._render se this.xpos this.ypos se this.width this.height )]]]
 .listen "draw [if this.draw = this.draw.h [cancel] this._drawp.val hair.object.replace this.objname this.draw 1 if and this.scene = :hair_gui_scene this.display = "true [this._render]]
-;.method "move [[xypos][if not list? :xypos [hair.debug.error _e "ÒÆ¶¯»­²¼ĞèÒªxy×ø±ê×é³ÉµÄ±í×÷Îª²ÎÊı stop] this.xpos.val first :xypos this.ypos.val last :xypos]]
+;.method "move [[xypos][if not list? :xypos [hair.debug.error _e "ç§»åŠ¨ç”»å¸ƒéœ€è¦xyåæ ‡ç»„æˆçš„è¡¨ä½œä¸ºå‚æ•° stop] this.xpos.val first :xypos this.ypos.val last :xypos]]
 .method "show [if this.display = "true [stop] this.display.val "true]
 .method "hide [if this.display = "false [stop] this.display.val "false]
-.method "init [[scene][if not this.scene = 0 [hair.debug.error _e "²»ÄÜÖØ¸´³õÊ¼»¯»­²¼ stop] if not member? :scene $select "scene [hair.debug.error _e "³¡¾°²»´æÔÚ stop] run se word :scene ".addcanvas quoted this.objname this.scene.val :scene]] ;³õÊ¼»¯µÇ¼Ç»­²¼µ½Ä³¸ö³¡¾°ÖĞ
+.method "init [[scene][if not this.scene = 0 [hair.debug.error _e "ä¸èƒ½é‡å¤åˆå§‹åŒ–ç”»å¸ƒ stop] if not member? :scene se $select "scene $select "animation [hair.debug.error _e "åœºæ™¯ä¸å­˜åœ¨ stop] run se word :scene ".addcanvas quoted this.objname this.scene.val :scene]] ;åˆå§‹åŒ–ç™»è®°ç”»å¸ƒåˆ°æŸä¸ªåœºæ™¯ä¸­
 if :hair_debug [.listen "mousestatus [if this.mousestatus = "click [pr "clicked] if not this.mousestatus = this.mousestatus.h [( this._render se this.xpos this.ypos se this.width this.height )]]]
-.method "key [[apply command][if this.scene = 0 [hair.debug.error _e "ÇëÏÈ³õÊ¼»¯»­²¼ stop] run (se (word this.scene ".addapply) :apply quoted this.objname (list :command))]] ;Ïò³¡¾°µÇ¼Ç»­²¼ĞèÒª¼ì²âµÄ°´¼üÒÔ¼°ĞèÒªÖ´ĞĞµÄÓï¾ä
-.method "applykeyall [if this.scene = 0 [hair.debug.error _e "ÇëÏÈ³õÊ¼»¯»­²¼ stop] run se word this.scene ".keyallobj.val quoted this.objname] ;Ïò³¡¾°ÉêÇëËø¶¨¼üÅÌ¼àÌı
-.method "freekeyall [if this.scene = 0 [hair.debug.error _e "ÇëÏÈ³õÊ¼»¯»­²¼ stop] run se word this.scene ".keyallobj.val quoted "] ;Ïò³¡¾°ÉêÇëÊÍ·Å¼üÅÌËø¶¨
-.method "keyall [[key][pr :key]] ;µ±±¾»­²¼Ëø¶¨¼üÅÌ¼àÌıµÄÊ±ºòÓöµ½¼üÅÌÊäÈëÊÂ¼ş´Ë·½·¨±»µ÷ÓÃ
+.method "key [[apply command][if this.scene = 0 [hair.debug.error _e "è¯·å…ˆåˆå§‹åŒ–ç”»å¸ƒ stop] run (se (word this.scene ".addapply) :apply quoted this.objname (list :command))]] ;å‘åœºæ™¯ç™»è®°ç”»å¸ƒéœ€è¦æ£€æµ‹çš„æŒ‰é”®ä»¥åŠéœ€è¦æ‰§è¡Œçš„è¯­å¥
+.method "applykeyall [if this.scene = 0 [hair.debug.error _e "è¯·å…ˆåˆå§‹åŒ–ç”»å¸ƒ stop] run se word this.scene ".keyallobj.val quoted this.objname] ;å‘åœºæ™¯ç”³è¯·é”å®šé”®ç›˜ç›‘å¬
+.method "freekeyall [if this.scene = 0 [hair.debug.error _e "è¯·å…ˆåˆå§‹åŒ–ç”»å¸ƒ stop] run se word this.scene ".keyallobj.val quoted "] ;å‘åœºæ™¯ç”³è¯·é‡Šæ”¾é”®ç›˜é”å®š
+.method "keyall [[key][pr :key]] ;å½“æœ¬ç”»å¸ƒé”å®šé”®ç›˜ç›‘å¬çš„æ—¶å€™é‡åˆ°é”®ç›˜è¾“å…¥äº‹ä»¶æ­¤æ–¹æ³•è¢«è°ƒç”¨
 .method "_reset [( this._render se this.xpos this.ypos se this.width this.height )]
 .method "_render [[[xy []] [wh []]][if not :hair_gui_scene = this.scene [stop]
-	ask this.turtle [ht]
 	if not this.keepback = 0 [
-		if not this.noflicker [setbitindex this.keepback ask this.turtle [pu setpos hair.base.logoxy se first :xy (last :xy) + last :wh pd localmake "restore bitindex setbitindex this.keepback bitpaste setbitindex :restore]]
+		if not this.noflicker [setbitindex this.keepback pu setpos hair.base.logoxy se first :xy (last :xy) + last :wh pd localmake "restore bitindex setbitindex this.keepback bitpaste setbitindex :restore]
 	]
-	if not this.display [ask this.turtle [pu setpos hair.base.logoxy se this.xpos this.ypos pd] stop]
-	ask this.turtle [pu setpos hair.base.logoxy se this.xpos this.ypos + this.height pd]
-	if and this.keepback = 0 not this.noflicker [this.keepback.val :hair_resource_piclimit hair.base.makep "hair_resource_piclimit localmake "restore bitindex setbitindex this.keepback ask this.turtle [bitcopy this.width this.height] setbitindex :restore]
-	if not this.noflicker [localmake "restore bitindex setbitindex this.keepback ask this.turtle [bitcopy this.width this.height] setbitindex :restore]
-	ask this.turtle [PENNORMAL setpencolor "black setpensize 1 SETHEADING 0 pu setpos hair.base.logoxy se this.xpos this.ypos pd run this._drawp ]
+	if not this.display [pu setpos hair.base.logoxy se this.xpos this.ypos pd stop]
+	pu setpos hair.base.logoxy se this.xpos this.ypos + this.height pd
+	if and this.keepback = 0 not this.noflicker [this.keepback.val :hair_resource_piclimit hair.base.makep "hair_resource_piclimit localmake "restore bitindex setbitindex this.keepback bitcopy this.width this.height setbitindex :restore]
+	if not this.noflicker [localmake "restore bitindex setbitindex this.keepback bitcopy this.width this.height setbitindex :restore]
+	PENNORMAL setpencolor "black setpensize 1 SETHEADING 0 pu setpos hair.base.logoxy se this.xpos this.ypos pd run this._drawp 
 ]]
-;noflickerÓÃÀ´½â¾öÉÁË¸ÎÊÌâ£¬¼´²»ÌùÔ­Í¼£¬Ö±½ÓÓÃĞÂÍ¼¸²¸ÇµÄ°ì·¨£¬³¡¾°¾ÖÏŞÔÚdrawµÄÇ°ºó·¶Î§±ØĞëÍêÃÀÏàÍ¬
+;noflickerç”¨æ¥è§£å†³é—ªçƒé—®é¢˜ï¼Œå³ä¸è´´åŸå›¾ï¼Œç›´æ¥ç”¨æ–°å›¾è¦†ç›–çš„åŠæ³•ï¼Œåœºæ™¯å±€é™åœ¨drawçš„å‰åèŒƒå›´å¿…é¡»å®Œç¾ç›¸åŒ
 
-;¼Ì³Ğ»­²¼ÀàµÄÍ¼Æ¬»­²¼£¬½â¾öÍ¸Ã÷ÎÊÌâ
+;ç»§æ‰¿ç”»å¸ƒç±»çš„å›¾ç‰‡ç”»å¸ƒï¼Œè§£å†³é€æ˜é—®é¢˜
 new "PicCanvas "Class
 .inherit "Canvas
 .listen "pic [make "restore bitindex setbitindex this.pic this.width.val 2+first bitsize this.height.val 2+last bitsize setbitindex :restore]
@@ -141,43 +142,44 @@ new "PicCanvas "Class
 .listen "width []
 .listen "height []
 
-;´´½¨±êÇ©Àà¼Ì³Ğ»­²¼Àà
+;åˆ›å»ºæ ‡ç­¾ç±»ç»§æ‰¿ç”»å¸ƒç±»
 new "Tag "Class
 .inherit "Canvas
 .before [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length )]
-.attr [text ÕâÊÇÒ»¸ötag color black length 20 draw [pu setxy xcor+1 ycor-1 pd setpencolor this.color make "_tagtext this.text repeat int (count this.text ) / this.length [hair.old.tt hair.base.getitem this.length :_tagtext make "_tagtext hair.base.delitem this.length :_tagtext pu bk (last labelsize first this.text ) pd] hair.old.tt :_tagtext setpencolor "black]]
-.listen "text [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ( this._reset )]
+.attr [text è¿™æ˜¯ä¸€ä¸ªtag color black length 20 draw [pu setxy xcor+1 ycor-1 pd setpencolor this.color make "_tagtext this.text repeat int (count this.text ) / this.length [hair.old.tt hair.base.getitem this.length :_tagtext make "_tagtext hair.base.delitem this.length :_tagtext pu bk (last labelsize first this.text ) pd] hair.old.tt :_tagtext setpencolor "black]]
+.listen "text [ifelse this.text = this.text.h [cancel][this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ( this._reset )]]
 .listen "length [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ]
 .listen "color [this.width.val this.length * first labelsize first this.text this.height.val (last labelsize first this.text ) * (1+int (count this.text ) / this.length ) ( this._reset )]
 .listen "mousestatus [if this.mousestatus="click [this.freekeyall]]
 .listen "draw []
 
 
-;´´½¨ĞÂ»­²¼Àà£¬²ÉÓÃº£¹êÖ±½Ó»æÖÆµÄ·½Ê½¡£
+;åˆ›å»ºæ–°ç”»å¸ƒç±»ï¼Œé‡‡ç”¨æµ·é¾Ÿç›´æ¥ç»˜åˆ¶çš„æ–¹å¼ã€‚
 new "Button "Class
 .inherit "Canvas 
 .attr [_draw 0 _mtime 0 width 90 height 40 text Button hotkey 0 click [] _click [] press [] _press [] hover [] _hover [] wait [] _wait [] noflicker true draw [
-	' [³õÊ¼»¯°´Å¥£¬ÏÈÇåÀí³ö¿Õ°×ÇøÓò]
+	' [åˆå§‹åŒ–æŒ‰é’®ï¼Œå…ˆæ¸…ç†å‡ºç©ºç™½åŒºåŸŸ]
 	if this._draw=0 [
 		pu setxy xcor + this.height/2 ycor - this.height/2 pd
-		pe setpensize this.height rt 90 fd this.width - this.height rt 90 PENNORMAL setpensize 1
+		pe setpensize this.height
+		ht rt 90 fd this.width - this.height rt 90 PENNORMAL setpensize 1
 		pu setx xcor + this.height/2 pd
 		repeat 2[arc2 90 this.height/2 fd this.width - this.height arc2 90 this.height/2] lt 180
 		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd hair.old.tt this.text
 	]
-	' [´Ówait±äÎªhover]
+	' [ä»waitå˜ä¸ºhover]
 	if this._draw=1 [
 		pu setxy xcor + this.height/2 ycor - this.height/2 pd
 		setpensize this.height rt 90 fd this.width - this.height lt 90 PENNORMAL setpensize 1
 		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd setpencolor "white hair.old.tt this.text
 	]
-	' [´Ópress/click±äÎªhover]
+	' [ä»press/clickå˜ä¸ºhover]
 	if this._draw=2 [
 		pu setxy xcor + this.height/2 ycor - this.height/2 pd
 		setpensize this.height rt 90 fd this.width - this.height lt 90 PENNORMAL setpensize 1
 		pu setpos hair.base.logoxy se this.xpos + ( this.width - first labelsize this.text )/2 this.ypos + ( this.height - last labelsize this.text )/2 pd setpencolor "white hair.old.tt this.text
 	]
-	' [´Óhover±äpress]
+	' [ä»hoverå˜press]
 	if this._draw=3 [
 		pu setxy xcor + this.height/2 ycor - this.height/2 pd
 		setpencolor "grey setpensize this.height rt 90 fd this.width - this.height lt 90 PENNORMAL setpensize 1 
@@ -204,9 +206,9 @@ new "Button "Class
 		run this._hover]
 	if this.mousestatus = "wait [this._draw.val 0 this.text.val this.text run this._wait]]
 .listen "text [( this._render se this.xpos this.ypos se this.width this.height )]
-;²ÉÓÃnoflicker·ÀÖ¹ÉÁË¸£¬²»½¨ÒéÔÚ³¡¾°Ë¢ĞÂºó²Ù×÷°´Å¥£¬¼´¸Ä±ä´óĞ¡£¬¸Ä±äÎ»ÖÃ£¬¸Ä±äÎÄ×Ö¡£
+;é‡‡ç”¨noflickeré˜²æ­¢é—ªçƒï¼Œä¸å»ºè®®åœ¨åœºæ™¯åˆ·æ–°åæ“ä½œæŒ‰é’®ï¼Œå³æ”¹å˜å¤§å°ï¼Œæ”¹å˜ä½ç½®ï¼Œæ”¹å˜æ–‡å­—ã€‚
 
-;´´½¨ÎÄ±¾¿òÀà£¬¿ªÊ¼Ö§³Ö¼üÅÌ½»»¥
+;åˆ›å»ºæ–‡æœ¬æ¡†ç±»ï¼Œå¼€å§‹æ”¯æŒé”®ç›˜äº¤äº’
 new "Input "Class
 .inherit "Canvas
 .attr [width 150 height 40 length 10 text Input noflicker true draw[
@@ -225,22 +227,66 @@ new "Input "Class
 	]
 ]
 .listen "_keyall [if this._keyall.h = this.objname [this._reset]]
-.method "keyall [[key][ifelse not :key = 8 [ if this.length<count this.text [stop] this.text.val word this.text char :key][if not empty? this.text [this.text.val bl this.text]]]] ;µ±±¾»­²¼Ëø¶¨¼üÅÌ¼àÌıµÄÊ±ºòÓöµ½¼üÅÌÊäÈëÊÂ¼ş´Ë·½·¨±»µ÷ÓÃ
+.method "keyall [[key][ifelse not :key = 8 [ if this.length<count this.text [stop] this.text.val word this.text char :key][if not empty? this.text [this.text.val bl this.text]]]] ;å½“æœ¬ç”»å¸ƒé”å®šé”®ç›˜ç›‘å¬çš„æ—¶å€™é‡åˆ°é”®ç›˜è¾“å…¥äº‹ä»¶æ­¤æ–¹æ³•è¢«è°ƒç”¨
+
+;åŠ¨ç”»æ¥äº†
+;ç»§æ‰¿åœºæ™¯ç±»
+;å°†åœºæ™¯å½“åšåŠ¨ç”»ä¸­çš„ä¸€å¸§æ¥å¤„ç†ï¼Œå¹¶æä¾›é¢å¤–çš„å‚æ•°å¸®åŠ©ç»„ä»¶å®ç°åŠ¨ç”»æ•ˆæœ
+new "Animation "Class
+.inherit "Scene
+.attr [rendertime 0 _endtime 0 _end false period 10000 background [hair.old.tt "Animation] FPS 0 _FPS 0 _fpstick 0 _frame 1 transform [] onFPS 60 _transform [] _p10 0 dropframe 0]
+.listen "transform [if this.transform = this.transform.h [cancel] this._transform.val hair.object.replace this.objname this.transform 1]
+.method "start [
+	this.rendertime.val timemilli
+	this._fpstick.val timemilli
+	this._endtime.val this.rendertime + this.period
+	this._frame.val 1
+	this._p10.val 0
+	this._end.val "false
+	this.render
+	while [and timemilli < this._endtime not this._end][
+		;fpså±•ç¤º
+		if :hair_debug [
+			pu setpos $logoxy [0 20] pd
+			SETPENCOLOR "white
+			$tt word "FPS\: this._FPS
+			this._FPS.val this.FPS
+			SETPENCOLOR "black
+			$tt word "FPS\: this.FPS
+		]
+
+		make "_p10s int (timemilli - this.rendertime)/(1000/ this.onFPS)
+		if this._p10 < :_p10s [
+			this.dropframe.val :_p10s- this._p10-1
+			run this._transform
+			this._p10.val :_p10s
+		]
+		
+		;foreach this.canvas [make "_sceneitem ? if run word :_sceneitem ".display [run word :_sceneitem "._reset]]
+
+		this._frame.val this._frame + 1
+		if 0=REMAINDER this._frame 50 [this.FPS.val round 1000/(timemilli - this._fpstick)*50 this._fpstick.val timemilli]
+		
+	]
+]
+.method "stop [
+	this._end.val "true
+]
 end
 
-;²»¶ÔÍâ¹«¿ª
-;ÓÃÀ´¸ù¾İ²ÎÊı»ñÈ¡»­²¼µÄÃû³Æ
+;ä¸å¯¹å¤–å…¬å¼€
+;ç”¨æ¥æ ¹æ®å‚æ•°è·å–ç”»å¸ƒçš„åç§°
 ;[a c1 b c2 a c3] ==a==> [c1 c3]
-;ÃüÁî°æ±¾ºÅv1.3
+;å‘½ä»¤ç‰ˆæœ¬å·v1.3
 
 to hair.gui.findnext :v :l
 if empty? :l [op []]
 ifelse :v = first :l [op se first bf :l hair.gui.findnext :v bf bf :l] [op hair.gui.findnext :v bf bf :l]
 end
 
-;»ñÈ¡ÏÂ´Î°´¼ü
-;Èç¹ûÔÚÉÏ´Îµ÷ÓÃgetkeyºóÒÑ¾­±»°´ÁË°´¼ü£¬ÔòÁ¢¼´·µ»Ø£¬·ñÔò¾ÍÒ»Ö±µÈ´ı°´¼ü
-;ÃüÁî°æ±¾ºÅv1.3
+;è·å–ä¸‹æ¬¡æŒ‰é”®
+;å¦‚æœåœ¨ä¸Šæ¬¡è°ƒç”¨getkeyåå·²ç»è¢«æŒ‰äº†æŒ‰é”®ï¼Œåˆ™ç«‹å³è¿”å›ï¼Œå¦åˆ™å°±ä¸€ç›´ç­‰å¾…æŒ‰é”®
+;å‘½ä»¤ç‰ˆæœ¬å·v1.3
 
 to hair.gui.getkey
 forever [
@@ -251,9 +297,9 @@ forever [
 		wait 1 ]
 end
 
-;ÅĞ¶ÏÄ³µãÊÇ·ñÔÚÄ³Ò»·¶Î§ÄÚ
-;»ùÓÚlogo×ø±ê
-;ÃüÁî°æ±¾ºÅv1.3
+;åˆ¤æ–­æŸç‚¹æ˜¯å¦åœ¨æŸä¸€èŒƒå›´å†…
+;åŸºäºlogoåæ ‡
+;å‘½ä»¤ç‰ˆæœ¬å·v1.3
 
 TO hair.gui.inrange :xy1 :xy2 :width :height
 	(local "x "x2 "y "y2)
@@ -262,42 +308,43 @@ TO hair.gui.inrange :xy1 :xy2 :width :height
 	ifelse (AND :x >= :x2 :x <= :x2+:width :y <= :y2 :y >= :y2-:height ) [OP "TRUE] [OP "FALSE]
 END
 
-;ÅĞ¶ÏÁ½¸ö¾ØĞÎ»­²¼ÊÇ·ñ³åÍ»£¬logo×ø±ê
-;²»¶ÔÍâ¹«¿ª
-;Êµ¼ÊÉÏÊÇv1Åö×²¼ì²âµÄ¸ÄĞ´£¬Í¬Ê±Ò²Ö§³ÖÏÖÔÚµÄÅö×²¼ì²â£¬µ«ÊÇ²»¶ÔÍâ¹«¿ª
-;Ê¹ÓÃµÄÊÇ¹«¿ªµÄinrange·½·¨
-;ÅĞ¶ÏµÄ·½·¨ÊÇÁ½¸ö»­²¼µÄ°Ë¸öµã¶¼²»ÄÜÔÚ¶Ô·½µÄÇøÓòÄÚ
-;ÃüÁî°æ±¾ºÅv1.3
-;trueÎª²»³åÍ»£¬falseÎª³åÍ»
+;åˆ¤æ–­ä¸¤ä¸ªçŸ©å½¢ç”»å¸ƒæ˜¯å¦å†²çªï¼Œlogoåæ ‡
+;ä¸å¯¹å¤–å…¬å¼€
+;å®é™…ä¸Šæ˜¯v1ç¢°æ’æ£€æµ‹çš„æ”¹å†™ï¼ŒåŒæ—¶ä¹Ÿæ”¯æŒç°åœ¨çš„ç¢°æ’æ£€æµ‹ï¼Œä½†æ˜¯ä¸å¯¹å¤–å…¬å¼€
+;ä½¿ç”¨çš„æ˜¯å…¬å¼€çš„inrangeæ–¹æ³•
+;åˆ¤æ–­çš„æ–¹æ³•æ˜¯ä¸¤ä¸ªç”»å¸ƒçš„å…«ä¸ªç‚¹éƒ½ä¸èƒ½åœ¨å¯¹æ–¹çš„åŒºåŸŸå†…
+;å‘½ä»¤ç‰ˆæœ¬å·v1.3
+;trueä¸ºä¸å†²çªï¼Œfalseä¸ºå†²çª
 
 to hair.gui.collision :xy1 :wh1 :xy2 :wh2
-;Ê×ÏÈ¼ÆËã³öËÄ¸öµãÀ´
+;é¦–å…ˆè®¡ç®—å‡ºå››ä¸ªç‚¹æ¥
 localmake "xxyy1 []
-queue "xxyy1 :xy1 ;×óÉÏ½Ç
-queue "xxyy1 se (first :xy1) + (first :wh1) last :xy1 ;ÓÒÉÏ½Ç
-queue "xxyy1 se first :xy1 (last :xy1) - (last :wh1) ;×óÏÂ½Ç
-queue "xxyy1 se (first :xy1) + (first :wh1) (last :xy1) - (last :wh1) ;ÓÒÏÂ½Ç
-;ÅĞ¶ÏÕâËÄ¸öµã²»ÔÚ¶Ô·½·¶Î§ÄÚ£¬ÈÎºÎÒ»¸öÔÚ·¶Î§ÄÚ¾ÍÖ±½ÓÍ£µô
+queue "xxyy1 :xy1 ;å·¦ä¸Šè§’
+queue "xxyy1 se (first :xy1) + (first :wh1) last :xy1 ;å³ä¸Šè§’
+queue "xxyy1 se first :xy1 (last :xy1) - (last :wh1) ;å·¦ä¸‹è§’
+queue "xxyy1 se (first :xy1) + (first :wh1) (last :xy1) - (last :wh1) ;å³ä¸‹è§’
+;åˆ¤æ–­è¿™å››ä¸ªç‚¹ä¸åœ¨å¯¹æ–¹èŒƒå›´å†…ï¼Œä»»ä½•ä¸€ä¸ªåœ¨èŒƒå›´å†…å°±ç›´æ¥åœæ‰
 foreach :xxyy1 [if hair.gui.inrange ? :xy2 first :wh2 last :wh2 [op "false]]
-;¼ÆËãÁíÍâËÄ¸öµã
+;è®¡ç®—å¦å¤–å››ä¸ªç‚¹
 localmake "xxyy2 []
-queue "xxyy2 :xy2 ;×óÉÏ½Ç
-queue "xxyy2 se (first :xy2) + (first :wh2) last :xy2 ;ÓÒÉÏ½Ç
-queue "xxyy2 se first :xy2 (last :xy2) - (last :wh2) ;×óÏÂ½Ç
-queue "xxyy2 se (first :xy2) + (first :wh2) (last :xy2) - (last :wh2) ;ÓÒÏÂ½Ç
-;ÅĞ¶ÏÕâËÄ¸öµã²»ÔÚ¶Ô·½·¶Î§ÄÚ£¬ÈÎºÎÒ»¸öÔÚ·¶Î§ÄÚ¾ÍÖ±½ÓÍ£µô
+queue "xxyy2 :xy2 ;å·¦ä¸Šè§’
+queue "xxyy2 se (first :xy2) + (first :wh2) last :xy2 ;å³ä¸Šè§’
+queue "xxyy2 se first :xy2 (last :xy2) - (last :wh2) ;å·¦ä¸‹è§’
+queue "xxyy2 se (first :xy2) + (first :wh2) (last :xy2) - (last :wh2) ;å³ä¸‹è§’
+;åˆ¤æ–­è¿™å››ä¸ªç‚¹ä¸åœ¨å¯¹æ–¹èŒƒå›´å†…ï¼Œä»»ä½•ä¸€ä¸ªåœ¨èŒƒå›´å†…å°±ç›´æ¥åœæ‰
 foreach :xxyy2 [if hair.gui.inrange ? :xy1 first :wh1 last :wh1 [op "false]]
-;Èç¹ûÈ«²¿²»ÔÚ£¬ÔòÊä³ö²»³åÍ»
+;å¦‚æœå…¨éƒ¨ä¸åœ¨ï¼Œåˆ™è¾“å‡ºä¸å†²çª
 op "true
 end
 
-;ÅĞ¶ÏÊÇ·ñÓĞ°´¼ü
-;ÃüÁî°æ±¾ºÅv1.3
+;åˆ¤æ–­æ˜¯å¦æœ‰æŒ‰é”®
+;å‘½ä»¤ç‰ˆæœ¬å·v1.3
 
 to hair.gui.keyp
 ifelse 0 = count :hair_gui_keybuffer [ output "FALSE ] [ output "TRUE ]
 end
 
-
-
-make "startup [hair.gui.reg pr [hairGUI is started.]]
+to hairgui
+hair.gui.reg
+pr [hairGUI is started.]
+end

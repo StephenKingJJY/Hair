@@ -2,7 +2,7 @@
 ;版本v2.0.0.20180829dev
 ;作者：SK (jjy@wiwy.us)
 ;@MIT License
-
+;buildoptions make "buildos [fmslogo]
 make "attr_temp "
 make "method_temp "
 make "listen_temp "
@@ -114,7 +114,7 @@ end
 ;读取类中的数据创建对象
 ;默认创建objname,class属性，提供对this的解释，挂载list，创建对象过程
 ;对象的复制copy(下版本？)
-;命令版本号v1.3
+;命令版本号v2.2.1
 
 to hair.object.new :name :class
 ;当新建的是一个类的时候直接调用class命令处理
@@ -126,7 +126,10 @@ if not proplist? word "hair_object_class_ :class [hair.debug.error (se "Class :c
 
 ;定义xx.过程显示所有可用操作提示
 make (word "hair_object_ :name "_tip) []
-define word :name ". hair.object.replace :name [[][hair.object.refresh __name op thing (word "hair_object_ __name "_tip)]] 3
+
+;define word :name ". hair.object.replace :name [[][hair.object.refresh __name op thing (word "hair_object_ __name "_tip)]] 3
+;让对象提示更友好点
+define word :name ". hair.object.replace :name [[][hair.object.refresh __name pr hair.debug.tool.repeat3 thing (word "hair_object_ __name "_tip)]] 3 
 
 ;首先定义内置的对象属性
 queue (word "hair_object_ :name "_tip) ".objname
@@ -375,3 +378,4 @@ repeat count :objall [queue "classall item (item repcount :objall) :hair_object_
 op :classall
 end
 
+;buildoptions make "buildos [fmslogo ucblogo lhogho]

@@ -1,0 +1,62 @@
+;现在hair2.2的核心模块支持在ucblogo、fmslogo、lhogho上运行
+;尽量保证win和linux下表现一致
+;版本号v2.2
+
+
+;判断当前环境
+to hair.fallback.osdetect
+if name? "logodialect [if :logodialect="Lhogho [op "lhogho]]
+ifelse name? "logoversion [op "ucblogo] [op "fmslogo]
+op "unknown
+end
+
+make "hair_fallback_os hair.fallback.osdetect
+
+;buildoptions make "buildos [lhogho]
+;根据不同平台的支持情况处理各个命令的兼容性问题
+;platform指的是原本该命令已经存在的平台
+
+;make "REDEFP "true
+;make "hair_fallback_compatible []
+
+;to hair.fallback.compatible :primitive :platform
+;if empty? :primitive [stop]
+;make "hair_fallback_compatible lput gensym :hair_fallback_compatible
+;repeat count :platform [if (item repcount :platform) = :hair_fallback_os [run (list "copydef quoted last :hair_fallback_compatible quoted first :primitive) run list "erase quoted first :primitive]]
+;hair.fallback.compatible bf :primitive :platform
+;end
+
+;to hair.fallback.compatible.repeat :primitive :platform
+;if empty? :primitive [stop]
+;repeat count :platform [if (item repcount :platform) = :hair_fallback_os [run (list "copydef quoted first :primitive quoted first :hair_fallback_compatible)]]
+;make "hair_fallback_compatible bf :hair_fallback_compatible
+;hair.fallback.compatible.repeat bf :primitive :platform
+;end
+
+;hair.fallback.compatible [directories chdir popdir timemilli dllload dllcall dllfree filter sort reduce] [fmslogo] 
+to directories
+end
+to chdir
+end
+to popdir
+end
+to timemilli
+end
+to dllload :x
+end
+to dllcall :x
+end
+to dllfree
+end
+to filter :x :y
+end
+to sort :x
+end
+to reduce :x :y
+end
+;hair.fallback.compatible.repeat [directories chdir popdir timemilli dllload dllcall dllfree filter sort reduce] [fmslogo] 
+;hair.fallback.compatible [shell] [fmslogo ucblogo] 
+to shell
+end
+;hair.fallback.compatible.repeat [shell] [fmslogo ucblogo] 
+;buildoptions make "buildos [fmslogo ucblogo lhogho]

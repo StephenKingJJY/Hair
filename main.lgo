@@ -1,5 +1,5 @@
 ;hair¿ò¼Ü
-;°æ±¾v2.1.0.20190619dev
+;°æ±¾v2.2.1.20221209dev
 ;×÷Õß£ºSK (jjy@wiwy.us)
 ;@MIT License
 ;ÏµÍ³±£Áôº£¹ê39£¨ÔØÈëÍ¼Æ¬£©£¬ÔÚÄãµÄ³ÌĞò¿ªÊ¼Ö®Ç°ÏòÏµÍ³ÉêÇë$turtlefreeµÃµ½Ò»¸ö¿ÉÓÃµÄº£¹ê±àºÅ
@@ -11,7 +11,19 @@ to hair [:debug "true]
 ct window
 make "CASEIGNOREDP "TRUE
 pr [hair is starting...]
-pr [StephenKing v2.1 @MIT License]
+pr [StephenKing v2.2.1 @MIT License]
+
+;´´½¨ÓÃÀ´»ñÈ¡windowËõ·Å±äÁ¿µÄ´°¿Ú-v2.2
+windowcreate "main "test "testH 100 0 1 1 []
+
+;»ñÈ¡±£´æ´°¿Ú³õÊ¼¾ä±úºÍwindowËõ·Å±äÁ¿ÓÃµ½µÄ¾ä±ú-v2.2
+dllload "user32.dll
+make "hair_hwnd dllcall [L FindWindowA S FMSLogo L 0]
+make "hair_window_radio dllcall [L FindWindowA S testH L 0]
+dllload "Hair.dll
+make "hair_window_radio 100/first dllcall se [L getWindowX L] :hair_window_radio
+windowdelete "test
+dllfree
 
 ;debugÄ£Ê½Ïà¹Ø
 ifelse or :debug = 0 :debug = "false [make "hair_debug "false][make "hair_debug "true]
@@ -24,16 +36,9 @@ if not member? "FMSLogo.exe files [hair.debug.error [current dir is wrong.] stop
 ;Æô¶¯¼òĞ´Ö¸Áî
 hair.noconflict "$
 
-;»ñÈ¡±£´æ´°¿Ú³õÊ¼¾ä±ú
-if not name? "hair_hwnd [
-	dllload "user32.dll
-	make "hair_hwnd dllcall [L FindWindowA S FMSLogo L 0]
-	dllfree
-]
-
 ;ÅäÖÃÄ¬ÈÏµÄ±äÁ¿
 make "hair_keepword [class hair new hook all $ destroy cancel listen inherit method before after attr tip objectname havedefine] ;ÉèÖÃ¿ò¼Ü±£Áô×Ö
-make "hair_version 2.1 ;hair¿ò¼Ü°æ±¾
+make "hair_version "2.2.1 ;hair¿ò¼Ü°æ±¾
 make "hair_language "zh_cn ;hairÓïÑÔ°æ±¾
 make "hair_detect "false ;¿ªÆô¼ì²â»º´æ
 make "hair_turtle [39] ;±ê¼ÇÕ¼ÓÃº£¹ê
@@ -53,18 +58,112 @@ if member? [Ó×Ô²] fontfacenames [($setfont -16 0 [Ó×Ô²])] ;ÉèÖÃ×ÖÌå£¬Ó×Ô²×ÖÌå×Öº
 if member? [Î¢ÈíÑÅºÚ] fontfacenames [($setfont -16 0 [Î¢ÈíÑÅºÚ])] ;ÉèÖÃ×ÖÌå£¬ÓĞÎ¢ÈíÑÅºÚÊ±Ê¹ÓÃÑÅºÚ£¬½â¾öwinxp
 
 ;17Äê8ÔÂ8ÈÕ£º»¹ÊÇ´òËãÊ¹ÓÃ´«Í³µÄÃüÁî·½Ê½ÊµÏÖÀàµÄ¶¨ÒåºÍ¶ÔÏóµÄ´´½¨
+;22Äê12ÔÂ16ÈÕ£º¶àÄêÒÔºó£¬ÖÕÓÚ¶ÔÕâÀïÓÅ»¯ÁË£¬¸üºÃµÄ¹ÜÀíÏîÄ¿£¬´ò°üÖ´ĞĞ³ÌĞò
 new "Project "Class
-	;µ«ÊÇ´òËãÊ¹ÓÃÁ¬Ğø¶¨ÒåµÄ·½Ê½¼ò»¯µ÷ÓÃ,startupÊôĞÔÓÃÀ´±ê¼ÇÆô¶¯Ê±µ÷ÓÃµÄÖ÷Èë¿Ú¹ı³Ì£¬Ä¬ÈÏÎªmain¡£
-	.attr [title untitle width 1000 height 1000 mode ss startup main]
-	;Í¨¹ı±£´æÉÏÒ»¸ö²Ù×İµÄ¶ÔÏóÀ´ÊµÏÖ¼òµ¥µ÷ÓÃ£¬Ö§³Ö¹ı³ÌÃûÒ²Ö§³ÖÔÚ±íÖĞĞ´Óï¾ä
+	;startupÊôĞÔÓÃÀ´±ê¼ÇÆô¶¯Ê±µ÷ÓÃµÄÖ÷Èë¿ÚÎÄ¼ş£¬Ä¬ÈÏÎªmain¡£Õâ¸öÎÄ¼şĞèÒªÔÚ±»loadºó×ÔÖ´ĞĞ£¬±ÈÈçÌí¼Óstartup±äÁ¿¡£
+	;filelist°üº¬ËùÓĞĞèÒª´ò°üµÄÎÄ¼ş£¬ÕâĞ©ÎÄ¼ş±ØĞë´æÔÚÓÚÖ÷Ä¿Â¼ÏÂ
+	;¿ÉÄÜ²»ÊÇËùÓĞÏîÄ¿ÎÄ¼ş¶¼ĞèÒªÔÚÖ´ĞĞµÄÊ±ºò±»ÒıÓÃ¡£»¹ÓĞ¸öÎÊÌâÊÇ¿½±´µÄÊ±ºò»á¶ªÊ§Â·¾¶¹ØÏµ
+	.attr [title untitle width 1000 height 1000 mode ss startup main.lgo filelist [main.lgo] needGUI false needRes false icon main.ico]
 	.before [if not empty? hair.object.select "project [hair.debug.error _e "²»ÄÜÖØ¸´´´½¨project¶ÔÏó cancel] if :hair_debug [hair.base.settitle "untitle\(Hair\ on\ FMSLogo\)]]
-	;cancelÓÃÀ´ÖÕÖ¹¶ÔÏóµÄ´´½¨¹ı³Ì£¬before±íÊ¾¶¨Òå¶ÔÏó´´½¨Ö®Ç°ËùĞèµÄ²Ù×÷.afterÓÃÀ´ÃèÊö¶ÔÏóÏú»ÙÇ°µÄ²½Öè
-	.after [hair.debug.error "project¶ÔÏóÒÑ±»É¾³ı]
-	.listen "width [if :hair_debug [hair.debug.error "²»ÄÜÔÚ´Ë´¦Ö¸¶¨¿í¶È cancel]]
-	.listen "height [if :hair_debug [hair.debug.error "²»ÄÜÔÚ´Ë´¦Ö¸¶¨¸ß¶È cancel]]
-	;ÕâÀïÖ»¶Ô´°¿Ú»¯fsÄ£Ê½×öÏìÓ¦£¬ÒÑÖªbugÊÇÖ»ÄÜÏìÓ¦Ò»´Î
-	.listen "mode [if this.mode="fs [windowset "Commander 0 setfocus [FMSLogo] make "hair_gui_listenkey "true]]
+	.listen "mode [run this.mode if this.mode="fs [if not :hair_debug [windowset "Commander 0 setfocus [FMSLogo]] make "hair_gui_listenkey "true]]
 	.listen "title [hair.base.settitle this.title]
+	;±£´æ·½·¨×ö¼¸¸ö²Ù×÷£ºÔÚdistÏÂÃæĞÂÔöÏîÄ¿ÎÄ¼ş¼Ğ£¬±£´æ¿É±»loadµÄÏîÄ¿ĞÅÏ¢ÎÄ¼ş£¬´´½¨ÒıÓÃÈë¿ÚÎÄ¼ş£¬Éú³É´ò°üÅäÖÃÎÄ¼ş£¬¿½±´ÏîÄ¿ÎÄ¼ş
+	.method "save [
+		' [ĞÂÔöÏîÄ¿ÎÄ¼ş¼Ğ]
+		localmake "_dir_restore hair.base.whatdir
+		chdir :hair_maindir
+		ifelse not member? "dist DIRECTORIES [mkdir "dist][chdir "dist]
+		ifelse not member? this.title DIRECTORIES [mkdir this.title][chdir this.title]
+		' [±£´æÏîÄ¿ĞÅÏ¢ÎÄ¼ş]
+		openwrite word this.title ".hproj
+		setwrite word this.title ".hproj
+		pr [make "_projectname first hair.object.select "project]
+		pr se [run se word :_projectname ".title.val quoted] quoted this.title
+		pr se [run se word :_projectname ".width.val quoted] quoted this.width
+		pr se [run se word :_projectname ".height.val quoted] quoted this.height
+		pr se [run se word :_projectname ".mode.val quoted] quoted this.mode
+		pr se [run se word :_projectname ".startup.val quoted] quoted this.startup
+		pr se [run se word :_projectname ".needGUI.val quoted] quoted this.needGUI
+		pr se [run se word :_projectname ".needRes.val quoted] quoted this.needRes
+		pr se [run se word :_projectname ".icon.val quoted] quoted this.icon
+		pr se [run list word :_projectname ".filelist.val] (list this.filelist)
+		setwrite []
+		close word this.title ".hproj
+		' [´´½¨ÒıÓÃÈë¿ÚÎÄ¼ş]
+		openwrite "_entry.lgo
+		setwrite "_entry.lgo
+		pr [make "startup [_entry]]
+		pr [to _entry]
+		pr [(hair "false)]
+		if this.needGUI [pr "hairgui]
+		pr [new "_p "project]
+		pr se [_p.load] quoted this.title 
+		pr se [load] quoted this.startup
+		pr [end]
+		setwrite []
+		close "_entry.lgo
+		' [Éú³É´ò°üÅäÖÃÎÄ¼ş]
+		openwrite word this.title ".txt
+		setwrite word this.title ".txt
+		pr [\;!@Install@!UTF-8!]
+		pr [GUIMode="2"]
+		pr [MiscFlags="4"]
+		pr (se [RunProgram="fmslogo -w] this.width [-h] this.height [-f -l _entry.lgo"])
+		pr [\;!@InstallEnd@!]
+		pr se [7zSFXBuilder_SFXName=] (word :hair_maindir "\\dist\\ this.title "\\ this.title ".exe)
+		if not empty? this.icon [pr se [7zSFXBuilder_SFXIcon=] (word :hair_maindir "\\dist\\ this.title "\\ this.icon)]
+		pr [7zSFXBuilder_UseDefMod=7zsd_LZMA2]
+		pr se [7zSFXBuilder_SFXFile_1=] (word :hair_maindir "\\fmslogo.exe)
+		pr se [7zSFXBuilder_SFXFile_2=] (word :hair_maindir "\\Hair.dll)
+		pr se [7zSFXBuilder_SFXFile_3=] (word :hair_maindir "\\Hair.lgo)
+		pr se [7zSFXBuilder_SFXFile_4=] (word :hair_maindir "\\startup.logoscript)
+		pr se [7zSFXBuilder_SFXFile_5=] (word :hair_maindir "\\logolib\\)
+		localmake "_i 6
+		if this.needGUI [pr se (word "7zSFXBuilder_SFXFile_ :_i "=) (word :hair_maindir "\\HairGui.lgo) make "_i :_i+1]
+		if this.needRes [pr se (word "7zSFXBuilder_SFXFile_ :_i "=) (word :hair_maindir "\\hair_res\\) make "_i :_i+1]
+		foreach se this.filelist se "_entry.lgo word this.title ".hproj [
+			pr se (word "7zSFXBuilder_SFXFile_ :_i "=) (word :hair_maindir "\\dist\\ this.title "\\ ? )
+			make "_i :_i+1
+		]
+		pr [7zSFXBuilder_7Zip_Level=Ultra]
+		pr [7zSFXBuilder_7Zip_Method=LZMA2]
+		pr [7zSFXBuilder_7Zip_Dictionary=64 MB]
+		pr [7zSFXBuilder_7Zip_BlockSize=Solid]
+		setwrite []
+		close word this.title ".txt
+		' [¿½±´ÏîÄ¿ÎÄ¼ş]
+		chdir :hair_maindir
+		foreach this.filelist [
+			hair.base.copyfile ? (word "dist\\ this.title "\\ ?)
+		]
+		' [»Øµ½³õÊ¼Ä¿Â¼]
+		chdir :_dir_restore
+		pr "±£´æÍê³É
+	]
+	.method "load [[_projectname][
+		ifelse :hair_debug [
+		localmake "_dir_restore hair.base.whatdir
+		chdir :hair_maindir
+		chdir "dist
+		chdir :_projectname
+		load word :_projectname ".hproj
+		chdir :_dir_restore][
+			load word :_projectname ".hproj
+		]]]
+	.method "test [
+		chdir :hair_maindir
+		this.save
+		pr "¸´ÖÆÈë¿ÚÎÄ¼şµ½Ö÷Ä¿Â¼
+		hair.base.copyfile (word "dist\\ this.title "\\_entry.lgo ) "_entry.lgo
+		hair.base.copyfile (word "dist\\ this.title "\\ this.title ".hproj ) word this.title ".hproj 
+		pr "Æô¶¯²âÊÔ
+		ignore (hair.base.shell (se [fmslogo -w] this.width [-h] this.height [-f -l _entry.lgo]) "nooutput "vbs)
+		pr "µÈ´ıÉ¾³ıÈë¿ÚÎÄ¼ş...
+		wait 500
+		pr "É¾³ıÈë¿ÚÎÄ¼ş
+		erf "_entry.lgo
+		erf word this.title ".hproj 
+	]
 
 ;Èç¹ûÊÇdebugÄ£Ê½£¬¼´Ê¹ÓÃ¶¨ÒåµÄÏîÄ¿Àà´´½¨Ò»¸ö¶ÔÏó
 if :hair_debug [new "yourproject "Project]

@@ -78,6 +78,7 @@ catch "error [copydef word :s "loadpic       "hair.resource.loadpic   ];--$loadp
 
 ;debug类指令系列
 ;catch "error [copydef word :s "build         "hair.debug.build   ];--$build              编译生成程序
+catch "error [copydef word :s "restart       "hair.debug.restart ];--$restart            重启调试
 ;catch "error [copydef word :s "statistic     "hair.debug.statistic];-$statistic          统计hair框架代码的总数
 ;catch "error [copydef word :s "test          "hair.debug.test    ];--$test               用来测试程序运行
 catch "error [copydef word :s "tool          "hair.debug.tool    ];--$tool               hair开发者工具
@@ -95,10 +96,11 @@ catch "error [copydef word :s "classp        "hair.object.classp ];--$classp == 
 ;module类指令系列
 catch "error [copydef word :s "case         "hair.module.case    ];--$case :a            类似其他的case语句
 catch "error [copydef word :s "idgen        "hair.module.idgen   ];--$idgen              输出一个全局唯一id
-catch "error [copydef word :s "position     "hair.module.position];--$position :a :b     输出a在b中的位置
+catch "error [copydef word :s "position     "hair.base.index     ];--$position :a :b     输出a在b中的位置
 catch "error [copydef word :s "switch       "hair.module.switch  ];--$switch :a          类似其他的switch语句
 
 ;file类指令系列
+catch "error [copydef word :s "compressdir  "hair.file.compressdir];-$compressdir :a :b  压缩一个目录
 catch "error [copydef word :s "extension    "hair.file.extension ];--$extension :a       目录下指定扩展名的文件
 end
 

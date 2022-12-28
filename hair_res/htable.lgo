@@ -1,6 +1,7 @@
 ;hair官方模块htable
 ;实现关系数据库基本功能及sql相关指令
-;命令版本号v2.0
+;2.2-增加读取分隔符为逗号的类csv格式文件的功能
+;命令版本号v2.2
 
 make "hair_table_sync [] ;保存每次操作后留下的内存与文件之间差异的待同步部分
 make "hair_table_sync_lock "false ;当一个同步操作执行时锁定，false表示不锁定
@@ -8,14 +9,21 @@ make "hair_table_sync_lock "false ;当一个同步操作执行时锁定，false�
 to hair.table
 hook "hair_timer_data [hair.table.sync]
 new "Htable "Class
-    .attr [filename demo.htab autosync false field [] data [] _data []] ;这里的filename以资源文件目录为基准,_data存储了尚未同步的数据
+    .attr [filename demo.htab autosync false field [] data [] _data [] csv false] ;这里的filename以资源文件目录为基准,_data存储了尚未同步的数据
     .listen "filename [if not empty? this._data [hair.debug.error [There is data unsaved.] cancel] this.autosync.val "false this.data.val [] this.field.val []] ;filename重置的时候恢复默认值
+    .method "_readcsv list [list] [localmake "_csv [] localmake "_w "
+        foreach first :list [
+            ifelse ?=", [queue "_csv :_w make "_w "] [make "_w word :_w ?]
+        ]
+        queue "_csv :_w
+        op :_csv
+    ]
     .method "load [localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res if not member? this.filename files [hair.debug.error [You should create datafile first.] stop]
         openread this.filename
         setread this.filename
-        this.field.val readlist
+        ifelse this.csv [this.field.val this._readcsv readlist] [this.field.val readlist]
         this.data.val hair.old.array se 1 (count this.field)/2
-        until [eof?][this.data.val listtoarray se arraytolist this.data (list listtoarray readlist)]     
+        ifelse this.csv [until [eof?][this.data.val listtoarray se arraytolist this.data (list listtoarray this._readcsv readlist)]] [until [eof?][this.data.val listtoarray se arraytolist this.data (list listtoarray readlist)]]
         chdir :_dir
         setread []
         close this.filename
@@ -101,9 +109,9 @@ new "Htable "Class
         localmake "data this.data
         localmake "sqlselect []
         localmake "sqlfieldnum count first :data
-        repeat count :data [localmake "repdata repcount repeat :sqlfieldnum [make (word "f repcount) item repcount item :repdata :data]
+        repeat (count :data)-1 [localmake "repdata repcount repeat :sqlfieldnum [make (word "f repcount) item repcount item :repdata+1 :data]
         if empty? :e [make "e ["true]]
-        if run :e [make "sqlselect lput item repcount :data :sqlselect]]
+        if run :e [make "sqlselect lput item repcount+1 :data :sqlselect]]
         repeat :sqlfieldnum [ern word "f repcount]
         op listtoarray :sqlselect
     ]

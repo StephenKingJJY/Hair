@@ -1,0 +1,33 @@
+﻿make "startup [simpledemo]
+
+to simpledemo
+ht
+(hair "false)
+hairgui
+new "p "project
+.title.val "SimpleDemo
+.mode.val "fs
+.width.val 500
+.height.val 400
+
+make "a 0
+new "s "scene
+new "b1 "Button
+.init "s
+.xpos.val 10
+.ypos.val 130
+.text.val "增加
+.click.val [make "a :a+1 t.text.val (word "您已点击 :a "次)]
+new "b2 "button
+.init "s
+.xpos.val 150
+.ypos.val 130
+.text.val "清零
+.click.val [make "a 0 t.text.val (word "您已点击 :a "次)]
+new "t "tag
+.init "s
+.text.val (word "您已点击 :a "次)
+.xpos.val 340
+.ypos.val 130
+s.render
+end

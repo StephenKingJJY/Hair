@@ -1,0 +1,150 @@
+﻿make "startup [gobang]
+
+to gobang
+ht
+new "s "scene
+.background.val [pu bk 600 pd bitload "bg.hpic]
+new "l "tag
+.init "s
+.text.val "五子棋游戏
+.xpos.val 20
+.ypos.val 20
+new "l2 "tag
+.init "s
+.xpos.val 250
+.ypos.val 50
+.text.val "轮到黑棋下了
+new "b "button
+.init "s
+.text.val "重新开始
+.xpos.val 500
+.ypos.val 550
+.click.val [l2.text.val "轮到黑棋下了 c.reset]
+new "chess "class
+.inherit "canvas
+.listen "mousestatus [if and :win2=" this.mousestatus = "click [hair.gobang.mouse2]]
+.method "reset [
+make "win2 "
+make "win 1
+make "go $array [19 19]
+make "go_value $array [19 19]
+make "go_value2 $array [19 19]
+s.render
+( this._render se this.xpos this.ypos se this.width this.height )]
+new "c "chess
+.draw.val [repeat 4[bk 400 lt 90] pu rt 145 fd 5 SETFLOODCOLOR [218 182 120] (fill "true) bk 5 lt 145 SETFLOODCOLOR 0 pd
+	pu setpos $logoxy [120 120] bk 360 pd
+	repeat 19[fd 360 pu setpos se xcor + 20 ycor - 360 pd]
+	pu setpos $logoxy [120 480] pd rt 90
+	repeat 19[fd 360 pu setpos se xcor - 360 ycor + 20 pd] lt 90]
+.xpos.val 100
+.ypos.val 100
+.width.val 400
+.height.val 400
+.init "s
+c.reset
+end
+
+TO hair.gobang.mouse2
+make "calxy $screenxy MOUSEPOS
+make "calx int ((first :calxy) - 110) / 20
+make "caly int ((last :calxy) - 110) / 20
+if (or :calx<0 :caly<0 :calx>18 :caly>18) [stop]
+if not empty? $aget :go se :calx :caly [stop]
+$aset :go se :calx :caly :win
+;MESSAGEBOX [aaa] se 120 + :calx * 20 120 + :caly * 20
+pu setpos $logoxy se 120 + :calx * 20 120 + :caly * 20 pd
+ifelse :win=1 [SETPENCOLOR "black SETFLOODCOLOR "black] [SETPENCOLOR "white SETFLOODCOLOR "white]
+CIRCLE 8 
+repeat 4 [rt 45 fd 5 (fill "true) bk 5 rt 45]
+(pr :win :calx :caly)
+ifelse check_win :calx :caly :win [make "win2 1 ifelse :win=1 [l2.text.val "黑棋赢了][l2.text.val "白棋赢了]][ifelse :win=1 [l2.text.val "轮到白棋下了][l2.text.val "轮到黑棋下了]]
+ifelse :win=1 [make "win 0] [make "win 1]
+END
+
+; 定义棋局判断函数
+to check_win :x :y :w
+  ; 判断横向五子连珠
+  make "horizontal []
+  make "horizontaln 1
+  for [i 1 4] [
+	if :x+:i<19 [
+    	make "horizontal se :horizontal safeaget :go se :x+:i :y
+	]
+  ]
+  make "horizontaln :horizontaln + check_win2 :horizontal :w 0
+  make "horizontal []
+  for [i -1 -4] [
+    if :x+:i>-1 [
+    	make "horizontal se :horizontal safeaget :go se :x+:i :y
+	]
+  ]
+  make "horizontaln :horizontaln + check_win2 :horizontal :w 0
+  if :horizontaln>=5 [op "true]
+
+  ; 判断纵向五子连珠
+  make "vertical []
+  make "verticaln 1
+  for [i 1 4] [
+	if :y+:i<19 [
+    	make "vertical se :vertical safeaget :go se :x :y+:i
+	]
+  ]
+  make "verticaln :verticaln + check_win2 :vertical :w 0
+  make "vertical []
+  for [i -1 -4] [
+    if :y+:i>-1 [
+    	make "vertical se :vertical safeaget :go se :x :y+:i
+	]
+  ]
+  make "verticaln :verticaln + check_win2 :vertical :w 0
+  if :verticaln>=5 [op "true]
+
+  ; 判断对角线五子连珠
+  make "diagonal1 []
+  make "diagonal1n 1
+  for [i 1 4] [
+	if and :x+:i<19 :y+:i<19 [
+    	make "diagonal1 se :diagonal1 safeaget :go se :x+:i :y+:i
+	]
+  ]
+  make "diagonal1n :diagonal1n + check_win2 :diagonal1 :w 0
+  make "diagonal1 []
+  for [i -1 -4] [
+    if and :x+:i>-1 :y+:i>-1 [
+    	make "diagonal1 se :diagonal1 safeaget :go se :x+:i :y+:i
+	]
+  ]
+  make "diagonal1n :diagonal1n + check_win2 :diagonal1 :w 0
+  if :diagonal1n>=5 [op "true]
+
+  make "diagonal2 []
+  make "diagonal2n 1
+  for [i 1 4] [
+	if and :x-:i>-1 :y+:i<19 [
+    	make "diagonal2 se :diagonal2 safeaget :go se :x-:i :y+:i 
+	]
+  ]
+  make "diagonal2n :diagonal2n + check_win2 :diagonal2 :w 0
+  make "diagonal2 []
+  for [i -1 -4] [
+    if and :x-:i<19 :y+:i>-1 [
+    	make "diagonal2 se :diagonal2 safeaget :go se :x-:i :y+:i
+	]
+  ]
+  make "diagonal2n :diagonal2n + check_win2 :diagonal2 :w 0
+  if :diagonal2n>=5 [op "true]
+
+  op "false
+end
+
+to check_win2 :l :w :n
+if empty? :l [op :n]
+if not equal? first :l :w [op :n]
+op check_win2 bf :l :w :n+1
+end
+
+to safeaget :a :b
+localmake "_ab $aget :a :b
+ifelse empty? :_ab [op -1][op :_ab]
+end

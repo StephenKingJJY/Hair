@@ -1,0 +1,8 @@
+﻿make "startup [_entry]
+to _entry
+(hair "false)
+hairgui
+new "_p "project
+_p.load "Gobang
+load "main.lgo
+end

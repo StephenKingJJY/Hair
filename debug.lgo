@@ -1,16 +1,23 @@
 ;处理debug相关的功能
 ;包括build操作、管理工具和在控制台报错
-;v2.0
+;v2.2.1
 
 
 ;管理工具
+;buildoptions make "buildos [fmslogo]
 to hair.debug.tool
-windowcreate "main "debugger "Hair开发者工具 0 0 120 300 []
+;获取当前fmslogo主程序的位置，debug工具始终靠在左侧
+dllload "Hair.dll
+localmake "_xy se dllcall se [L getWindowX L] :hair_hwnd dllcall se [L getWindowY L] :hair_hwnd
+make "hair_debug_winxy se int (first :_xy)*:hair_window_radio int (last :_xy)*:hair_window_radio
+(dllfree "Hair.dll)
+windowcreate "main "debugger "Hair开发者工具 (first :hair_debug_winxy)-120 last :hair_debug_winxy 120 int (item 13 machine)*:hair_window_radio []
 staticcreate "debugger "objmessage [hair_obj_list] 25 10 70 10
 listboxcreate "debugger "objlist 25 25 70 30
-buttoncreate "debugger "tip "显示对象tip 40 55 40 10 [hair.debug.tool.repeat2]
+buttoncreate "debugger "tip "显示对象tip 40 55 40 10 [hair.debug.tool.repeat2 first :hair_debug_winxy last :hair_debug_winxy]
 staticcreate "debugger "classmessage [hair_obj_class] 25 75 70 10
 listboxcreate "debugger "classlist 25 90 70 30
+staticcreate "debugger "curobjmessage [hair_object_current:] 25 125 70 20
 make "hair_debug_dribble 0
 buttoncreate "debugger "dri "开启日志 25 200 70 20 [ifelse :hair_debug_dribble=0 [make "hair_debug_dribble 1 dribble "hair_dirbble.txt
   buttonupdate "dri "停止日志][make "hair_debug_dribble 0 nodribble buttonupdate "dri "开启日志 WINDOWFILEEDIT "hair_dirbble.txt []]]
@@ -20,22 +27,71 @@ end
 to hair.debug.tool.repeat
 listboxdelete "objlist listboxdelete "classlist
 listboxcreate "debugger "objlist 25 25 70 30 listboxcreate "debugger "classlist 25 90 70 30
+staticupdate "curobjmessage se [hair_object_current:] :hair_object_current
 foreach :hair_object_list [listboxaddstring "objlist (list ?)]
 repeat count :hair_object_class [listboxaddstring "classlist (list item repcount :hair_object_class)]
 end
-to hair.debug.tool.repeat2
-windowcreate "debugger "wintip "对象tip 0 0 120 100 []
-staticcreate "wintip "tipmessage thing (word "hair_object_ first listboxgetselect "objlist "_tip) 0 0 110 50
-buttoncreate "wintip "end2 "关闭 50 70 20 10 [windowdelete "wintip]
+to hair.debug.tool.repeat2 :x :y
+localmake "_objtip hair.debug.tool.repeat3 thing (word "hair_object_ first listboxgetselect "objlist "_tip)
+ifelse 4=count :_objtip [
+  windowcreate "debugger "wintip "对象tip :x :y 120 100+(10+10*int (count apply "word first last :_objtip)/20)+10+10*int (count apply "word first first bf :_objtip)/20 []
+  buttoncreate "wintip "end2 "关闭 50 70+(10+10*int (count apply "word first last :_objtip)/20)+10+10*int (count apply "word first first bf :_objtip)/20 20 10 [windowdelete "wintip]
+][
+  windowcreate "debugger "wintip "对象tip :x :y 120 100+10+10*int (count apply "word first first bf :_objtip)/20 []
+  buttoncreate "wintip "end2 "关闭 50 70+10+10*int (count apply "word first first bf :_objtip)/20 20 10 [windowdelete "wintip]
+]
+staticcreate "wintip "tipmessage1 first :_objtip 10 10 110 10
+staticcreate "wintip "tipmessage2 first first bf :_objtip 10 20 110 10+10*int (count apply "word first first bf :_objtip)/20
+if 4=count :_objtip [
+  staticcreate "wintip "tipmessage3 first bf bf :_objtip 10 20+10+10*int (count apply "word first first bf :_objtip)/20 110 10
+  staticcreate "wintip "tipmessage4 first last :_objtip 10 30+10+10*int (count apply "word first first bf :_objtip)/20 110 10+10*int (count apply "word first last :_objtip)/20 
+]
 end
-
+to hair.debug.tool.repeat3 :l
+localmake "_output [[您可以使用对象属性：]]
+localmake "_m hair.debug.tool.repeat4 bf bf :l 1 1
+make "_output se :_output (list (list hair.debug.tool.repeat5 hair.base.getitem :_m+2 :l []))
+if (count :l)>:_m+2 [make "_output se :_output (list [您可以使用对象方法：] (list hair.base.delitem :_m+2 :l))]
+op :_output
+end
+to hair.debug.tool.repeat4 :l :n :m
+if empty? :l [op :m]
+if (count first :l)>6 [
+  if ".value =hair.base.delitem (count first :l)-6 first :l [op hair.debug.tool.repeat4 bf :l :n+1 :n]
+]
+op hair.debug.tool.repeat4 bf :l :n+1 :m
+end
+to hair.debug.tool.repeat5 :l :l2
+if empty? :l [op :l2]
+op hair.debug.tool.repeat5 bf remove word first :l ".val remove word first :l ".value :l lput first :l :l2
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]
 ;控制台输出信息
 to hair.debug.error :msg
-if word? :msg [make "msg (list :msg)]
-if :hair_debug [messagebox [hair error] :msg]
+(throw "error :msg)
 end
 
 ;注释功能
 to hair.debug.' :a
 ;if :hair_debug [pr :a]
 end
+
+;性能测试
+;注意无论是fmslogo还是lhogho，se、bl、last和lput都非常贵。应该替换成list、bf、first和fput来提升速度。
+;listbenchmark 1000000
+to listbenchmark :limit
+make "start hair.base.timemilli
+make "a []
+repeat :limit [	
+  make "a fput 1000 :a
+]
+pr hair.base.timemilli-:start 
+end
+
+;buildoptions make "buildos [fmslogo]
+;重启方便调试
+to hair.debug.restart 
+ignore hair.base.shell [fmslogo]
+bye
+end
+;buildoptions make "buildos [fmslogo ucblogo lhogho]

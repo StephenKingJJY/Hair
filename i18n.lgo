@@ -4,8 +4,8 @@
 ;_e "中国
 
 to hair.i18n.text :text
-switch :text
-case [cannot create the object of Project more than once] [op "不能重复创建project对象]
+$switch :text
+$case [cannot create the object of Project more than once] [op "不能重复创建project对象]
 ; 项目对象尚未创建 [the object of Project hasn't been created]
 ; 移动画布需要xy坐标组成的表作为参数 [Move needs a list as input]
 ; 场景不存在 [scene is not existed]

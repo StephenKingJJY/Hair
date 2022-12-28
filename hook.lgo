@@ -5,7 +5,7 @@
 to hair.hook.bind :action_name :command
 if :action_name = "all [hair.debug.error word :action_name [action_name is illegal.] stop]
 localmake "action_id 1 + count :hair_hook_index
-ifelse not member? :action_name :hair_hook_index [make "hair_hook_index se :hair_hook_index :action_name][make "action_id hair.module.position :action_name :hair_hook_index] ;如果该过程被优先执行（即create过程尚未调用），则直接注册该钩子
+ifelse not member? :action_name :hair_hook_index [make "hair_hook_index se :hair_hook_index :action_name][make "action_id hair.base.index :action_name :hair_hook_index] ;如果该过程被优先执行（即create过程尚未调用），则直接注册该钩子
 hair.old.aset :hair_hook_array :action_id-1 se (hair.old.aget :hair_hook_array :action_id-1) :command
 end
 
@@ -13,13 +13,13 @@ end
 to hair.hook.clear :action_name
 if :action_name = "all [make "hair_hook_array hair.old.array 200 make "hair_hook_index [] stop]
 if not member? :action_name :hair_hook_index [hair.debug.error word :action_name [action_name do not exist.] stop]
-hair.old.aset :hair_hook_array (hair.module.position :action_name :hair_hook_index)-1 []
+hair.old.aset :hair_hook_array (hair.base.index :action_name :hair_hook_index)-1 []
 end
 
 ;注册钩子
 to hair.hook.create :action_name
 if :action_name = "all [hair.debug.error word :action_name [action_name is illegal.] stop]
 if not member? :action_name :hair_hook_index [make "hair_hook_index se :hair_hook_index :action_name stop]
-localmake "command hair.old.aget :hair_hook_array (hair.module.position :action_name :hair_hook_index)-1
+localmake "command hair.old.aget :hair_hook_array (hair.base.index :action_name :hair_hook_index)-1
 ifelse not list? :command [run (se :command)][run :command]
 end

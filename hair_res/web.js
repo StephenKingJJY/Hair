@@ -2,11 +2,25 @@ const fs = require('fs')
 const request = require("request")
 const program = require('commander')
 const ftp = require("basic-ftp")
+const superagent = require('superagent');
 
 
 program
-.version('2.0')
+.version('2.2.1')
 .usage('Hair Web Module')
+
+program
+.command('gettext <api>')
+.description('api get')
+.action(function(api){
+    superagent
+    .get(api)
+    .end((err, res) => {
+      //console.log(res);
+      fs.writeFileSync("_api_result.txt",res.text)
+      fs.writeFileSync("_waitfile","")
+    });
+})
 
 program
 .command('get <filename> <url>')
