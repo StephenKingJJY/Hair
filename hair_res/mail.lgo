@@ -4,7 +4,7 @@
 
 to hair.mail
 new "hmail "Class
-.attr [host smtp.163.com port 465 secure true user cgc_2011@163.com pass whcgc2011 from cgc_2011@163.com]
+.attr [host smtp.163.com port 465 secure true user xxxxx@163.com pass xxxxx from xxxxx@163.com]
 .method "send list [to subject html attach] [
     if empty? :attach [make "attach 0]
     localmake "_dir hair.base.whatdir chdir :hair_maindir chdir :hair_res 
