@@ -1,4 +1,4 @@
-﻿;Hair_v2.2.1.20221209_package
+;Hair_v2.2.1.20221209_package
 ;build time: Mon Dec 26 14:58:34 2022
 ;target os: fmslogo
 make "hair_fallback_os "fmslogo
@@ -617,6 +617,98 @@ to _e :text
 op hair.i18n.text :text
 end
 ;------- module.lgo ---------
+
+make "hair_module_handshake []
+
+make "hair_module_store []
+make "hair_module_store_what_type []
+make "hair_module_switch "
+make "hair_module_id 1
+make "hair_module_node "true
+
+to hair.module.idgen
+if :hair_module_id = 5000 [make "hair_module_id 1]
+make "hair_module_id :hair_module_id+1
+op word timemilli hair.base.token 3 :hair_module_id 
+end
+
+to hair.module.switch :test
+make "hair_module_switch :test
+end 
+to hair.module.case :case :list
+if :hair_module_switch = :case [run :list]
+end
+
+to hair.module.in :what :path
+localmake "_id hair.module.idgen
+queue "hair_module_handshake :_id 
+
+localmake "exist 1
+ifelse not member? :path :hair_module_store [make "exist 0 catch "error [load word :path ".lgo make "exist 1] catch "error [load :path make "exist 1] if :exist = 1 [queue "hair_module_store :path queue "hair_module_store_what_type thing word "hair_module_handshake_ :_id]] [
+    make word "hair_module_handshake_ :_id item hair.base.index :path :hair_module_store :hair_module_store_what_type
+]
+
+ifelse and :hair_module_node :exist = 0 [
+    queue "hair_module_store :path queue "hair_module_store_what_type "node
+    make word "hair_module_handshake_ :_id [node]
+    localmake "_path (word "\(\" :path "\"\) )
+    define :what list [dot param] `[
+        openwrite "module_temp.js
+        setwrite "module_temp.js
+        pr [var hair_fs = require (\"fs\")]
+        pr [var ,:what = require ,:_path]
+        ifelse empty? :dot [
+            ifelse empty? :param [pr [var hair_var = ,@[word :what "\(\)]]][
+                pr se [var hair_var =] (word ",:what "\( hair.module.node.param :param "\) )
+            ]
+        ][
+            ifelse empty? :param [pr se [var hair_var =] (word ",:what ". :dot "\(\) )][
+                pr se [var hair_var =] (word ",:what ". :dot "\( hair.module.node.param :param "\) )
+            ]
+        ]
+        pr [hair_fs.writeFileSync("module_temp.htxt", hair_var)]
+        pr [hair_fs.writeFileSync("module_temp_end.htxt", "")]
+        setwrite []
+        close "module_temp.js
+        ignore shell [cmd /c node module_temp.js]
+        until [member? "module_temp_end.htxt files] [wait 1]
+        erf "module_temp.js
+        erf "module_temp_end.htxt
+        openread "module_temp.htxt
+        setread "module_temp.htxt
+        localmake "_out readrawline
+        setread []
+        close "module_temp.htxt
+        erf "module_temp.htxt
+        op :_out
+    ]
+][
+    if :exist = 0 [
+        hair.debug.error [module is not existed.]
+    ]
+]
+
+
+hair.module.switch last thing word "hair_module_handshake_ :_id
+hair.module.case "value [make :what first thing word "hair_module_handshake_ :_id]
+hair.module.case "procedure [copydef :what first thing word "hair_module_handshake_ :_id]
+hair.module.case "class [if not equal? :what first thing word "hair_module_handshake_ :_id [new :what "class .inherit first thing word "hair_module_handshake_ :_id]]
+
+er word "hair_module_handshake_ :_id
+make "hair_module_handshake bl :hair_module_handshake
+end 
+
+to hair.module.out :what :type
+ifelse member? :type [value procedure class] [make word "hair_module_handshake_ last :hair_module_handshake list :what :type] [hair.debug.error [wrong module type]]
+end
+
+to hair.module.node.param :list
+if not list? :list [op (word "\" :list "\")]
+localmake "_param "
+foreach :list [make "_param (word :_param "\" ? "\", )]
+op bl :_param
+end
+
 ;------- oop.lgo ---------
 make "attr_temp "
 make "method_temp "
